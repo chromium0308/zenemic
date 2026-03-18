@@ -1,0 +1,2 @@
+# zenemic
+Event organisation app

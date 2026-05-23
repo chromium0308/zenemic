@@ -1,0 +1,23 @@
+{
+  "expo": {
+    "name": "Zenemic",
+    "slug": "zenemic",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "zenemic",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.zenemic.app"
+    },
+    "android": {
+      "package": "com.zenemic.app"
+    },
+    "splash": {
+      "backgroundColor": "#f8f6f1",
+      "resizeMode": "contain"
+    },
+    "plugins": [],
+    "newArchEnabled": false
+  }
+}

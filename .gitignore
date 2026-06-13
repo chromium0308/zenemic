@@ -1,2 +1,12 @@
 .design-pkg/
 .DS_Store
+
+# Dependencies for any sub-project — installed locally, never committed.
+node_modules/
+
+# This repo is a container for independent sibling projects (main-app/, etc.).
+# npm should run inside a sub-project, never at the repo root. Ignore stray
+# artifacts from an accidental `npm install` run in the wrong directory.
+/package-lock.json
+/package.json
+/main-app/main-app/

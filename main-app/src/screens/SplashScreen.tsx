@@ -1,17 +1,14 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { View } from 'react-native';
 import { useTheme } from '../theme';
 import { ZenText } from '../components/ZenText';
 import { Spinner } from '../components/Spinner';
 import { IconLogo } from '../icons';
-import { ScreenProps } from '../navigation/types';
 
-export function SplashScreen({ navigation }: ScreenProps<'Splash'>) {
+// Shown only while the auth session is being restored. AppNavigator swaps to the
+// auth or app stack automatically once loading completes — no navigation here.
+export function SplashScreen() {
   const t = useTheme();
-  useEffect(() => {
-    const id = setTimeout(() => navigation.replace('SignUp'), 2400);
-    return () => clearTimeout(id);
-  }, [navigation]);
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>

@@ -2,12 +2,25 @@ import React, { useState } from 'react';
 import { Pressable, View } from 'react-native';
 import { useTheme } from '../theme';
 
-export function ZenToggle({ defaultOn = false }: { defaultOn?: boolean }) {
+export function ZenToggle({
+  defaultOn = false,
+  on: controlled,
+  onChange,
+}: {
+  defaultOn?: boolean;
+  on?: boolean;
+  onChange?: (next: boolean) => void;
+}) {
   const t = useTheme();
-  const [on, setOn] = useState(defaultOn);
+  const [internal, setInternal] = useState(defaultOn);
+  const on = controlled !== undefined ? controlled : internal;
   return (
     <Pressable
-      onPress={() => setOn((v) => !v)}
+      onPress={() => {
+        const next = !on;
+        if (controlled === undefined) setInternal(next);
+        onChange?.(next);
+      }}
       style={{
         width: 38,
         height: 22,

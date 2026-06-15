@@ -7,17 +7,30 @@ import { ZenText } from '../components/ZenText';
 import { ZenInput } from '../components/ZenInput';
 import { ZenButton } from '../components/ZenButton';
 import { IconMail } from '../icons';
+import { useAuth } from '../lib/auth';
 import { ScreenProps } from '../navigation/types';
 
 export function ForgotPasswordScreen({ navigation }: ScreenProps<'Forgot'>) {
   const t = useTheme();
+  const { resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const valid = email.includes('@') && email.includes('.');
 
-  const submit = () => {
-    if (!valid) return;
-    setSent(true);
+  const submit = async () => {
+    if (!valid || loading) return;
+    setLoading(true);
+    setError(null);
+    try {
+      await resetPassword(email);
+      setSent(true);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -47,6 +60,7 @@ export function ForgotPasswordScreen({ navigation }: ScreenProps<'Forgot'>) {
               autoCapitalize="none"
               onSubmitEditing={submit}
             />
+            {error ? <ZenText variant="body" style={{ color: t.danger }}>{error}</ZenText> : null}
           </Section>
         ) : (
           <Section paddingTop={60} gap={28} style={{ alignItems: 'center' }}>
@@ -80,9 +94,9 @@ export function ForgotPasswordScreen({ navigation }: ScreenProps<'Forgot'>) {
       <Anchor>
         {!sent ? (
           <ZenButton
-            label="Send reset link"
-            variant={valid ? 'primary' : 'disabled'}
-            trailingArrow
+            label={loading ? 'Sending…' : 'Send reset link'}
+            variant={valid && !loading ? 'primary' : 'disabled'}
+            trailingArrow={!loading}
             onPress={submit}
           />
         ) : (

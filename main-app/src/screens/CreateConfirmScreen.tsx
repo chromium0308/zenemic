@@ -6,32 +6,64 @@ import { Section, Anchor } from '../components/Section';
 import { ZenText } from '../components/ZenText';
 import { ZenButton } from '../components/ZenButton';
 import { Spinner } from '../components/Spinner';
+import { api, ApiError } from '../lib/api';
+import { formatBudget, splitModeLabel } from '../lib/format';
 import { useDraft } from '../navigation/DraftContext';
 import { ScreenProps } from '../navigation/types';
 
-const DEFAULT_FIELDS = {
-  title: "Mira's 28th Birthday",
-  date: '07 Jun 2026',
-  time: '7:30 PM',
-  location: 'Sister Ray, Hackney',
-  attendees: '12',
-  budget: '£480',
-  splitMode: 'Even split',
+type Fields = {
+  title: string;
+  date: string;
+  time: string;
+  location: string;
+  attendees: string;
+  budget: string;
+  splitMode: string;
 };
+
+const EMPTY: Fields = { title: '', date: '', time: '', location: '', attendees: '', budget: '', splitMode: 'Even split' };
 
 export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>) {
   const t = useTheme();
   const { draft, setDraft } = useDraft();
-  const [fields, setFields] = useState(draft.fields ?? DEFAULT_FIELDS);
+  const [fields, setFields] = useState<Fields>(draft.fields ?? EMPTY);
   const [extracting, setExtracting] = useState(!draft.fields);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!extracting) return;
-    const id = setTimeout(() => setExtracting(false), 1200);
-    return () => clearTimeout(id);
-  }, [extracting]);
+    if (draft.fields) return; // already extracted/edited — keep the user's values
+    let alive = true;
+    setExtracting(true);
+    setError(null);
+    api
+      .draftEvent(draft.message ?? '')
+      .then((ex) => {
+        if (!alive) return;
+        const next: Fields = {
+          title: ex.title,
+          date: ex.dateLabel,
+          time: ex.timeLabel,
+          location: ex.locationName,
+          attendees: String(ex.attendees),
+          budget: formatBudget(ex.budgetMajor, ex.currency),
+          splitMode: splitModeLabel(ex.splitMode),
+        };
+        setFields(next);
+        setDraft({ ...draft, extracted: ex, fields: next });
+        setExtracting(false);
+      })
+      .catch((e: ApiError) => {
+        if (!alive) return;
+        setError(e.message);
+        setExtracting(false);
+      });
+    return () => {
+      alive = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  const update = (k: keyof typeof fields, v: string) => setFields({ ...fields, [k]: v });
+  const update = (k: keyof Fields, v: string) => setFields((f) => ({ ...f, [k]: v }));
 
   if (extracting) {
     return (
@@ -43,6 +75,19 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
           <ZenText variant="body" style={{ textAlign: 'center', maxWidth: 280 }}>
             Zenemic AI is pulling out the event details…
           </ZenText>
+        </View>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, backgroundColor: t.bg }}>
+        <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
+          <ZenText variant="eyebrow" tone="fg3">EXTRACTION FAILED</ZenText>
+          <ZenText variant="body" style={{ textAlign: 'center', maxWidth: 280 }}>{error}</ZenText>
+          <ZenButton label="Go back" variant="ghost" fullWidth={false} onPress={() => navigation.goBack()} />
         </View>
       </View>
     );

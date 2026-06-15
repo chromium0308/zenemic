@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { FONTS, RADIUS, useTheme } from '../theme';
 import { ZenChrome } from '../components/ZenChrome';
 import { ZenText } from '../components/ZenText';
 import { ZenStatusBadge } from '../components/ZenStatusBadge';
+import { Spinner } from '../components/Spinner';
 import { IconArchive, IconChevron, IconClock, IconPlay, IconPlus } from '../icons';
-import { EVENTS, EventKind } from '../data/events';
+import { EventKind } from '../data/events';
+import { api, ApiError } from '../lib/api';
+import type { ApiEvent } from '../types/api';
 import { ScreenProps } from '../navigation/types';
 
 const TABS: { id: EventKind; label: string; icon: (color: string) => React.ReactNode }[] = [
@@ -17,7 +21,38 @@ const TABS: { id: EventKind; label: string; icon: (color: string) => React.React
 export function EventsListScreen({ navigation }: ScreenProps<'Events'>) {
   const t = useTheme();
   const [tab, setTab] = useState<EventKind>('planned');
-  const filtered = EVENTS.filter((e) => e.kind === tab);
+  const [events, setEvents] = useState<ApiEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchEvents = useCallback((mode: 'initial' | 'refresh' = 'initial') => {
+    let alive = true;
+    if (mode === 'refresh') setRefreshing(true);
+    else setLoading(true);
+    api
+      .getEvents()
+      .then((evs) => {
+        if (alive) {
+          setEvents(evs);
+          setError(null);
+        }
+      })
+      .catch((e: ApiError) => alive && setError(e.message))
+      .finally(() => {
+        if (alive) {
+          setLoading(false);
+          setRefreshing(false);
+        }
+      });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  useFocusEffect(useCallback(() => fetchEvents('initial'), [fetchEvents]));
+
+  const filtered = events.filter((e) => e.kind === tab);
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
@@ -50,59 +85,59 @@ export function EventsListScreen({ navigation }: ScreenProps<'Events'>) {
         })}
       </View>
 
-      <ScrollView contentContainerStyle={{ padding: 24, paddingBottom: 120, gap: 10 }}>
-        {filtered.length === 0 ? (
+      <ScrollView
+        contentContainerStyle={{ padding: 24, paddingBottom: 120, gap: 10, flexGrow: 1 }}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => fetchEvents('refresh')} tintColor={t.fg3} />}
+      >
+        {loading && events.length === 0 ? (
+          <View style={{ paddingVertical: 80, alignItems: 'center' }}>
+            <Spinner size={22} borderWidth={2} />
+          </View>
+        ) : error ? (
+          <View style={{ paddingVertical: 60, alignItems: 'center', gap: 8 }}>
+            <ZenText variant="eyebrow" tone="fg3">COULDN'T LOAD</ZenText>
+            <ZenText variant="body" style={{ textAlign: 'center', maxWidth: 280 }}>{error}</ZenText>
+            <Pressable onPress={() => fetchEvents('initial')} style={{ marginTop: 6 }}>
+              <ZenText variant="mark" tone="accent">TAP TO RETRY</ZenText>
+            </Pressable>
+          </View>
+        ) : filtered.length === 0 ? (
           <View style={{ paddingVertical: 60, alignItems: 'center' }}>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 8 }}>NO EVENTS</ZenText>
-            <ZenText variant="body">Nothing here yet. Tap + to create your first event.</ZenText>
+            <ZenText variant="body" style={{ textAlign: 'center' }}>Nothing here yet. Tap + to create your first event.</ZenText>
           </View>
-        ) : null}
-
-        {filtered.map((ev) => (
-          <Pressable
-            key={ev.id}
-            onPress={() => navigation.navigate('EventDetail', { event: ev })}
-            style={({ pressed }) => ({
-              backgroundColor: pressed ? t.surface2 : t.surface,
-              borderWidth: 0.5,
-              borderColor: t.hairline,
-              borderRadius: RADIUS.md,
-              paddingVertical: 16,
-              paddingHorizontal: 18,
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 12,
-            })}
-          >
-            <View style={{ flex: 1 }}>
-              <View style={{ marginBottom: 6 }}>
-                <ZenStatusBadge kind={ev.kind} />
+        ) : (
+          filtered.map((ev) => (
+            <Pressable
+              key={ev.id}
+              onPress={() => navigation.navigate('EventDetail', { event: ev })}
+              style={({ pressed }) => ({
+                backgroundColor: pressed ? t.surface2 : t.surface,
+                borderWidth: 0.5,
+                borderColor: t.hairline,
+                borderRadius: RADIUS.md,
+                paddingVertical: 16,
+                paddingHorizontal: 18,
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: 12,
+              })}
+            >
+              <View style={{ flex: 1 }}>
+                <View style={{ marginBottom: 6 }}>
+                  <ZenStatusBadge kind={ev.kind} />
+                </View>
+                <ZenText style={{ fontFamily: FONTS.sansMedium, fontSize: 16.5, color: t.fg, marginBottom: 4, letterSpacing: -0.16 }}>
+                  {ev.title}
+                </ZenText>
+                <ZenText style={{ fontFamily: FONTS.mono, fontSize: 11, color: t.fg3, letterSpacing: 0.66 }}>
+                  {ev.date.toUpperCase()} · {ev.attendees} ATTENDEES
+                </ZenText>
               </View>
-              <ZenText
-                style={{
-                  fontFamily: FONTS.sansMedium,
-                  fontSize: 16.5,
-                  color: t.fg,
-                  marginBottom: 4,
-                  letterSpacing: -0.16,
-                }}
-              >
-                {ev.title}
-              </ZenText>
-              <ZenText
-                style={{
-                  fontFamily: FONTS.mono,
-                  fontSize: 11,
-                  color: t.fg3,
-                  letterSpacing: 0.66,
-                }}
-              >
-                {ev.date.toUpperCase()} · {ev.attendees} ATTENDEES
-              </ZenText>
-            </View>
-            <IconChevron color={t.fg3} />
-          </Pressable>
-        ))}
+              <IconChevron color={t.fg3} />
+            </Pressable>
+          ))
+        )}
       </ScrollView>
 
       <Pressable

@@ -1,11 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ScrollView, View } from 'react-native';
 import { FONTS, RADIUS, useTheme } from '../theme';
 import { ZenChrome } from '../components/ZenChrome';
-import { Section } from '../components/Section';
+import { Section, Anchor } from '../components/Section';
 import { ZenText } from '../components/ZenText';
+import { ZenButton } from '../components/ZenButton';
 import { Spinner } from '../components/Spinner';
 import { IconCheck } from '../icons';
+import { api, ApiError } from '../lib/api';
+import { splitModeEnum } from '../lib/format';
+import { useDraft } from '../navigation/DraftContext';
+import type { CreateEventInput } from '../types/api';
 import { ScreenProps } from '../navigation/types';
 
 const TASKS = [
@@ -22,16 +27,68 @@ type State = 'done' | 'running' | 'pending';
 
 export function CreateProcessingScreen({ navigation }: ScreenProps<'CreateProcessing'>) {
   const t = useTheme();
+  const { draft, setDraft } = useDraft();
   const [done, setDone] = useState(0);
+  const [ready, setReady] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const started = useRef(false);
 
+  // Fire the real POST /events once.
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
+    const f = draft.fields;
+    const ex = draft.extracted;
+    if (!f) {
+      setError('Missing event details. Go back and describe your event again.');
+      return;
+    }
+    const input: CreateEventInput = {
+      title: f.title,
+      dateLabel: f.date,
+      timeLabel: f.time,
+      locationName: f.location,
+      attendees: Math.max(1, parseInt(f.attendees, 10) || ex?.attendees || 1),
+      guests: ex?.guests ?? [],
+      budget: f.budget || null,
+      currency: ex?.currency,
+      splitMode: splitModeEnum(f.splitMode),
+      startsAtISO: ex?.startsAtISO ?? null,
+      endsAtISO: ex?.endsAtISO ?? null,
+      sourceMessage: draft.message ?? null,
+    };
+    api
+      .createEvent(input)
+      .then(({ event }) => {
+        setDraft({ ...draft, created: event });
+        setReady(true);
+      })
+      .catch((e: ApiError) => setError(e.message));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Drive the task animation; navigate once it finishes AND the event is created.
+  useEffect(() => {
+    if (error) return;
     if (done < TASKS.length) {
       const id = setTimeout(() => setDone((d) => d + 1), 540);
       return () => clearTimeout(id);
     }
-    const id = setTimeout(() => navigation.replace('CreateSuccess'), 600);
-    return () => clearTimeout(id);
-  }, [done, navigation]);
+    if (ready) navigation.replace('CreateSuccess');
+  }, [done, ready, error, navigation]);
+
+  if (error) {
+    return (
+      <View style={{ flex: 1, backgroundColor: t.bg }}>
+        <ZenChrome label="EVENT.CREATE" progress={3} total={4} showMenu={false} />
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
+          <ZenText variant="eyebrow" tone="fg3">COULDN'T CREATE EVENT</ZenText>
+          <ZenText variant="body" style={{ textAlign: 'center', maxWidth: 280 }}>{error}</ZenText>
+          <ZenButton label="Go back" variant="ghost" fullWidth={false} onPress={() => navigation.goBack()} />
+        </View>
+      </View>
+    );
+  }
 
   const renderBox = (slice: typeof TASKS, offset: number) => (
     <View

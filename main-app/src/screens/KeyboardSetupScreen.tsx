@@ -1,11 +1,10 @@
-import React, { useState } from 'react';
-import { ScrollView, View } from 'react-native';
+import React from 'react';
+import { Image, Linking, ScrollView, View } from 'react-native';
 import { FONTS, RADIUS, useTheme } from '../theme';
 import { ZenChrome } from '../components/ZenChrome';
 import { Section, Anchor } from '../components/Section';
 import { ZenText } from '../components/ZenText';
 import { ZenButton } from '../components/ZenButton';
-import { IconCheck } from '../icons';
 import { ScreenProps } from '../navigation/types';
 
 const STEPS = [
@@ -15,33 +14,12 @@ const STEPS = [
   'Toggle on "Allow Full Access"',
 ];
 
-const ROW1 = 'qwertyuiop'.split('');
-const ROW2 = 'asdfghjkl'.split('');
-const ROW3 = 'zxcvbnm'.split('');
-
 export function KeyboardSetupScreen({ navigation }: ScreenProps<'Keyboard'>) {
   const t = useTheme();
-  const [installed, setInstalled] = useState(false);
-
-  const Key = ({ k }: { k: string }) => (
-    <View
-      style={{
-        flex: 1,
-        aspectRatio: 1 / 1.25,
-        backgroundColor: t.fg3Bg,
-        borderRadius: 6,
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginHorizontal: 2,
-      }}
-    >
-      <ZenText style={{ fontFamily: FONTS.mono, fontSize: 11, color: t.fg2 }}>{k}</ZenText>
-    </View>
-  );
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <ZenChrome label="SETUP · KEYBOARD" showMenu={false} />
+      <ZenChrome label="SETUP · KEYBOARD" onBack={() => navigation.goBack()} showMenu={false} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <Section paddingTop={24} gap={24}>
           <View>
@@ -52,58 +30,14 @@ export function KeyboardSetupScreen({ navigation }: ScreenProps<'Keyboard'>) {
             </ZenText>
           </View>
 
-          <View
-            style={{
-              borderWidth: 0.5,
-              borderColor: t.hairline,
-              borderRadius: RADIUS.lg,
-              padding: 18,
-              backgroundColor: t.surface,
-            }}
-          >
-            <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 14 }}>PREVIEW</ZenText>
+          <View style={{ borderWidth: 0.5, borderColor: t.hairline, borderRadius: RADIUS.lg, padding: 14, backgroundColor: t.surface }}>
+            <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>PREVIEW</ZenText>
 
-            <View style={{ flexDirection: 'row', marginHorizontal: -2 }}>
-              {ROW1.map((k) => <Key key={k} k={k} />)}
-            </View>
-            <View style={{ flexDirection: 'row', marginHorizontal: -2, marginTop: 5, paddingHorizontal: 12 }}>
-              {ROW2.map((k) => <Key key={k} k={k} />)}
-            </View>
-            <View style={{ flexDirection: 'row', marginHorizontal: -2, marginTop: 5, paddingHorizontal: 28 }}>
-              {ROW3.map((k) => <Key key={k} k={k} />)}
-            </View>
-
-            <View style={{ flexDirection: 'row', marginTop: 5, gap: 5 }}>
-              <View style={{ flex: 0.7, paddingVertical: 8, backgroundColor: t.fg3Bg, borderRadius: 6, alignItems: 'center' }}>
-                <ZenText style={{ fontFamily: FONTS.mono, fontSize: 10, color: t.fg3 }}>123</ZenText>
-              </View>
-              <View
-                style={{
-                  flex: 0.55,
-                  paddingVertical: 8,
-                  backgroundColor: t.accent,
-                  borderRadius: 6,
-                  alignItems: 'center',
-                }}
-              >
-                <ZenText
-                  style={{
-                    fontFamily: FONTS.monoSemibold,
-                    fontSize: 10,
-                    letterSpacing: 1.2,
-                    color: '#0a0a0a',
-                  }}
-                >
-                  ZEN
-                </ZenText>
-              </View>
-              <View style={{ flex: 2.2, paddingVertical: 8, backgroundColor: t.fg3Bg, borderRadius: 6, alignItems: 'center' }}>
-                <ZenText style={{ fontFamily: FONTS.mono, fontSize: 10, color: t.fg3 }}>space</ZenText>
-              </View>
-              <View style={{ flex: 0.9, paddingVertical: 8, backgroundColor: t.fg3Bg, borderRadius: 6, alignItems: 'center' }}>
-                <ZenText style={{ fontFamily: FONTS.mono, fontSize: 10, color: t.fg3 }}>↵</ZenText>
-              </View>
-            </View>
+            <Image
+              source={require('../../assets/keyboard.png')}
+              style={{ width: '100%', aspectRatio: 1170 / 816, borderRadius: RADIUS.md, backgroundColor: '#1c1c1e' }}
+              resizeMode="contain"
+            />
 
             <ZenText
               style={{
@@ -115,7 +49,7 @@ export function KeyboardSetupScreen({ navigation }: ScreenProps<'Keyboard'>) {
                 textTransform: 'uppercase',
               }}
             >
-              Tap the highlighted key from any chat
+              Tap the Zenemic logo key from any chat
             </ZenText>
           </View>
 
@@ -145,18 +79,9 @@ export function KeyboardSetupScreen({ navigation }: ScreenProps<'Keyboard'>) {
         </Section>
       </ScrollView>
       <Anchor>
-        <ZenButton
-          label={installed ? 'Opening Settings…' : 'Open iOS Settings'}
-          variant="primary"
-          trailingArrow={!installed}
-          leading={installed ? <IconCheck color={t.bg} /> : undefined}
-          onPress={() => {
-            setInstalled(true);
-            setTimeout(() => navigation.replace('Events'), 400);
-          }}
-        />
+        <ZenButton label="Open device Settings" variant="primary" trailingArrow onPress={() => Linking.openSettings()} />
         <View style={{ alignItems: 'center' }}>
-          <ZenButton label="Skip for now" variant="link" onPress={() => navigation.replace('Events')} />
+          <ZenButton label="Done" variant="link" onPress={() => navigation.goBack()} />
         </View>
       </Anchor>
     </View>

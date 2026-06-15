@@ -17,6 +17,7 @@ import {
 } from '@expo-google-fonts/jetbrains-mono';
 import { View } from 'react-native';
 import { ThemeProvider, useTheme } from './src/theme';
+import { AuthProvider } from './src/lib/auth';
 import { AppNavigator } from './src/navigation/AppNavigator';
 
 function Shell() {
@@ -46,7 +47,9 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <Shell />
+        <AuthProvider>
+          <Shell />
+        </AuthProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

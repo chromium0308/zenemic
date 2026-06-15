@@ -63,7 +63,8 @@ export function CreateDescribeScreen({ navigation }: ScreenProps<'CreateDescribe
           trailingArrow
           onPress={() => {
             if (!valid) return;
-            setDraft({ ...draft, message: msg });
+            // Reset any prior extraction so CreateConfirm re-extracts this message.
+            setDraft({ message: msg });
             navigation.navigate('CreateConfirm');
           }}
         />

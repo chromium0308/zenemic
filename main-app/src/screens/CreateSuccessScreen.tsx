@@ -7,7 +7,6 @@ import { ZenText } from '../components/ZenText';
 import { ZenButton } from '../components/ZenButton';
 import { IconBigCheck, IconCheck } from '../icons';
 import { useDraft } from '../navigation/DraftContext';
-import { EVENTS } from '../data/events';
 import { ScreenProps } from '../navigation/types';
 
 const PILLS = ['Chart', 'Calendar', 'Splitter', 'Locations', 'Album'];
@@ -15,6 +14,8 @@ const PILLS = ['Chart', 'Calendar', 'Splitter', 'Locations', 'Album'];
 export function CreateSuccessScreen({ navigation }: ScreenProps<'CreateSuccess'>) {
   const t = useTheme();
   const { draft } = useDraft();
+  const created = draft.created;
+  const title = created?.title ?? draft.fields?.title ?? 'Your event';
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
@@ -38,7 +39,7 @@ export function CreateSuccessScreen({ navigation }: ScreenProps<'CreateSuccess'>
             <ZenText variant="eyebrow" tone="fg3">DONE · 04 / 04</ZenText>
             <ZenText variant="h1" style={{ marginTop: 4, textAlign: 'center' }}>Event ready.</ZenText>
             <ZenText variant="body" style={{ marginTop: 12, textAlign: 'center', maxWidth: 280 }}>
-              {draft.fields?.title || 'Your event'} is set up with all 5 automated resources.
+              {title} is set up with all 5 automated resources.
             </ZenText>
           </View>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 8 }}>
@@ -79,7 +80,8 @@ export function CreateSuccessScreen({ navigation }: ScreenProps<'CreateSuccess'>
           label="Open event"
           variant="primary"
           onPress={() => {
-            navigation.replace('EventDetail', { event: EVENTS[0] });
+            if (created) navigation.replace('EventDetail', { event: created });
+            else navigation.popToTop();
           }}
         />
         <ZenButton label="Back to events" variant="ghost" onPress={() => navigation.popToTop()} />

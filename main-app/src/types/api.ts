@@ -16,7 +16,6 @@ export interface ApiEvent extends ZenEvent {
   resources: {
     calendar: { eventId: string; htmlLink: string } | null;
     mapsUrl: string | null;
-    tflUrl: string | null;
     albumUrl: string | null;
   };
   createdAt: string;
@@ -148,7 +147,6 @@ export interface Features {
   googleCalendar: boolean;
   googleMaps: boolean;
   stripe: boolean;
-  tfl: boolean;
   storage: boolean;
   push: boolean;
   email: boolean;

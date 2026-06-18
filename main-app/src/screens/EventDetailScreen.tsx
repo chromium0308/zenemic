@@ -73,7 +73,7 @@ export function EventDetailScreen({ navigation, route }: ScreenProps<'EventDetai
     { id: 'chart', label: 'Event planner chart', meta: `${stages.length || '—'} STAGES`, icon: <IconChart color={t.fg2} />, onPress: () => navigation.navigate('PlannerChart', { event: base }) },
     { id: 'cal', label: 'Calendar event', meta: calendar ? 'GOOGLE · SYNCED' : 'NOT CONNECTED', icon: <IconCalendar color={t.fg2} />, onPress: () => openUrl(calendar?.htmlLink, 'Connect Google Calendar in Settings to sync this event.') },
     { id: 'split', label: 'Payment splitter', meta: `${ev.budget ?? '—'} · ${headcount} WAYS`, icon: <IconMoney color={t.fg2} />, onPress: () => navigation.navigate('Splitter', { eventId: base.id, title: ev.title }) },
-    { id: 'loc', label: 'Linked locations', meta: 'MAPS · TFL', icon: <IconPin color={t.fg2} />, onPress: () => openUrl(detail?.resources.mapsUrl ?? detail?.resources.tflUrl, 'No location link for this event yet.') },
+    { id: 'loc', label: 'Linked locations', meta: 'MAPS', icon: <IconPin color={t.fg2} />, onPress: () => openUrl(detail?.resources.mapsUrl, 'No location link for this event yet.') },
     { id: 'pix', label: 'Shared photo album', meta: 'OPEN', icon: <IconPhotos color={t.fg2} />, onPress: () => navigation.navigate('Album', { eventId: base.id, title: ev.title }) },
   ];
 

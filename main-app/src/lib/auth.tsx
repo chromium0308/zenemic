@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { Session, User } from '@supabase/supabase-js';
 import { supabase } from './supabase';
+import { api } from './api';
+import { registerForPushNotificationsAsync } from './push';
 
 type AuthValue = {
   session: Session | null;
@@ -27,6 +29,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
     return () => sub.subscription.unsubscribe();
   }, []);
+
+  // Once signed in, register this device for push notifications (best-effort —
+  // a null token, denied permission, or pre-EAS setup just means no push).
+  const userId = session?.user?.id;
+  useEffect(() => {
+    if (!userId) return;
+    let alive = true;
+    registerForPushNotificationsAsync()
+      .then((token) => {
+        if (alive && token) return api.updateMe({ expoPushToken: token });
+      })
+      .catch(() => undefined);
+    return () => {
+      alive = false;
+    };
+  }, [userId]);
 
   const value = useMemo<AuthValue>(
     () => ({

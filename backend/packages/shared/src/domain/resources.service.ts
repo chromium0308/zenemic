@@ -3,7 +3,6 @@ import { logger } from '../config/logger';
 import { formatMoney } from '../lib/money';
 import { generateChart } from '../ai';
 import * as maps from '../integrations/googleMaps';
-import * as tfl from '../integrations/tfl';
 import * as calendar from '../integrations/googleCalendar';
 import * as storage from '../integrations/storage';
 import { createOrUpdateSplit } from './splitter.service';
@@ -59,9 +58,9 @@ export async function generateResources(eventId: string): Promise<ResourceReport
     logger.warn({ err, eventId }, 'chart generation failed');
   }
 
-  // 2. Location links (Google Maps + TfL). Maps deep link works without a key;
-  //    geocoding + transit need keys.
-  const locationUpdate: { locationLat?: number; locationLng?: number; placeId?: string; mapsUrl?: string; tflUrl?: string } = {};
+  // 2. Location links (Google Maps). Maps deep link works without a key;
+  //    geocoding + transit need a key.
+  const locationUpdate: { locationLat?: number; locationLng?: number; placeId?: string; mapsUrl?: string } = {};
   try {
     let placeId: string | null = null;
     if (maps.googleMapsEnabled) {
@@ -74,7 +73,6 @@ export async function generateResources(eventId: string): Promise<ResourceReport
       }
     }
     locationUpdate.mapsUrl = maps.directionsLink({ destination: event.location, placeId });
-    if (tfl.tflEnabled) locationUpdate.tflUrl = tfl.tflJourneyPlannerLink(event.location);
     report.locations = true;
   } catch (err) {
     logger.warn({ err, eventId }, 'location linking failed');

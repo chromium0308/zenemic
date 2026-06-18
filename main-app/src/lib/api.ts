@@ -28,7 +28,7 @@ export class ApiError extends Error {
     this.status = status;
     this.code = code;
   }
-  /** True when an optional integration (Stripe/Google/S3/TfL) isn't configured. */
+  /** True when an optional integration (Stripe/Google/S3) isn't configured. */
   get notConfigured() {
     return this.status === 503 || this.code === 'not_configured';
   }

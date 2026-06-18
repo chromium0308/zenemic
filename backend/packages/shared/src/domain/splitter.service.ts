@@ -1,8 +1,9 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
-import { evenSplit } from '../lib/money';
+import { evenSplit, formatMoney } from '../lib/money';
 import { notFound, badRequest } from '../lib/errors';
 import { createSplitPaymentLink, deactivatePaymentLink, stripeEnabled } from '../integrations/stripe';
+import { sendEmail } from '../integrations/email';
 import { logger } from '../config/logger';
 
 const splitInclude = {
@@ -96,6 +97,22 @@ export async function sendSplitRequests(eventId: string): Promise<SplitWithShare
         stripePaymentLinkUrl: link.url,
       },
     });
+
+    // Email the attendee their payment link (best-effort — a mail failure must
+    // never break the split, and sendEmail just logs when RESEND_API_KEY is unset).
+    if (share.attendee?.email) {
+      const amount = formatMoney(share.amountMinor, split.currency);
+      const name = share.attendee.name ?? 'there';
+      await sendEmail({
+        to: share.attendee.email,
+        subject: `Your share of ${split.event.title}`,
+        html:
+          `<p>Hi ${name},</p>` +
+          `<p>Your share of <strong>${split.event.title}</strong> is <strong>${amount}</strong>.</p>` +
+          `<p><a href="${link.url}">Pay your share</a></p>`,
+        text: `Hi ${name}, your share of ${split.event.title} is ${amount}. Pay here: ${link.url}`,
+      }).catch((err) => logger.warn({ err, shareId: share.id }, 'split request email failed'));
+    }
   }
 
   return prisma.split.findUniqueOrThrow({ where: { eventId }, include: splitInclude });

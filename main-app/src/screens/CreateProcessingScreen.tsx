@@ -17,7 +17,7 @@ const TASKS = [
   { id: 't1', label: 'Create event planner chart' },
   { id: 't2', label: 'Create calendar event' },
   { id: 't3', label: 'Build payment splitter' },
-  { id: 't4', label: 'Link locations · Maps + TfL' },
+  { id: 't4', label: 'Link locations · Maps' },
   { id: 't5', label: 'Open shared photo album' },
   { id: 't6', label: 'Create event in system' },
   { id: 't7', label: 'Store to database' },

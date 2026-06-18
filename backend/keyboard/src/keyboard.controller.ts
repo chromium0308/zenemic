@@ -47,7 +47,6 @@ export async function generate(identity: SupabaseIdentity, prompt: string) {
     total: full.budgetMinor != null ? toMajor(full.budgetMinor, full.currency) : 0,
     currency: full.currency,
     mapsUrl: full.resources.mapsUrl,
-    tflUrl: full.resources.tflUrl,
     calendar: full.resources.calendar,
     split: full.split,
   };

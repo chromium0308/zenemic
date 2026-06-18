@@ -4,7 +4,7 @@ API + AI orchestration for **Zenemic**, the AI event-planning app (`../../main-a
 This service owns everything the app's UI calls into: authentication, events, the AI
 chat assistant, payments/splitter, the shared album, and the third-party integration
 OAuth flows. Shared infrastructure (Prisma/DB, Supabase auth, the Anthropic pipeline,
-and the Calendar/Maps/Stripe/TfL clients) comes from
+and the Calendar/Maps/Stripe clients) comes from
 [`@zenemic/shared`](../packages/shared).
 
 > Part of the `backend/` npm-workspaces monorepo — see [`../README.md`](../README.md).
@@ -16,7 +16,7 @@ and the Calendar/Maps/Stripe/TfL clients) comes from
 | App flow | Backend |
 | --- | --- |
 | `CreateDescribe` → "Zenemic AI will pull out the details" | `POST /api/events/draft` — Claude extracts structured fields from free text |
-| `CreateProcessing` → "Setting up your event…" | `POST /api/events` — planner chart, calendar event, payment splitter, Maps + TfL links, album, then persists |
+| `CreateProcessing` → "Setting up your event…" | `POST /api/events` — planner chart, calendar event, payment splitter, Maps links, album, then persists |
 | `EventDetail` / `PlannerChart` | `GET /api/events/:id`, `GET /api/events/:id/chart` |
 | `EventChatPanel` ("Ask Zenemic") | `POST /api/events/:id/chat` — Claude with tool use; receipts itemised via vision |
 | Splitter | `GET/POST /api/events/:id/split`, `POST /api/events/:id/split/send` |

@@ -36,7 +36,6 @@ export function serializeEvent(event: Event) {
         ? { eventId: event.calendarEventId, htmlLink: event.calendarHtmlLink }
         : null,
       mapsUrl: event.mapsUrl,
-      tflUrl: event.tflUrl,
       albumUrl: event.albumUrl,
     },
     createdAt: event.createdAt,

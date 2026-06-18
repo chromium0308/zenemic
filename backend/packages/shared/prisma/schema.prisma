@@ -70,7 +70,6 @@ model Event {
   calendarEventId String?
   calendarHtmlLink String?
   mapsUrl         String?
-  tflUrl          String?
   albumUrl        String?
 
   createdAt DateTime @default(now())

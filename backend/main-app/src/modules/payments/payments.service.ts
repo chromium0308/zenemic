@@ -4,6 +4,7 @@ import { notFound, forbidden, badRequest } from '@zenemic/shared';
 import { toMinor } from '@zenemic/shared';
 import { logger } from '@zenemic/shared';
 import { serializeSplit } from '@zenemic/shared';
+import { push } from '@zenemic/shared';
 import {
   createOrUpdateSplit,
   sendSplitRequests,
@@ -82,10 +83,32 @@ export async function handleStripeEvent(event: Stripe.Event): Promise<void> {
     return;
   }
 
-  await prisma.splitShare
-    .update({
+  try {
+    await prisma.splitShare.update({
       where: { id: shareId },
       data: { status: 'PAID', paidAt: new Date(), stripePaymentIntentId: paymentIntentId },
-    })
-    .catch((err) => logger.warn({ err, shareId }, 'webhook: share update failed'));
+    });
+  } catch (err) {
+    logger.warn({ err, shareId }, 'webhook: share update failed');
+    return;
+  }
+
+  // Notify the event host that a guest paid (best-effort; no-op without a token).
+  try {
+    const share = await prisma.splitShare.findUnique({
+      where: { id: shareId },
+      include: { attendee: true, split: { include: { event: { include: { user: true } } } } },
+    });
+    const host = share?.split.event.user;
+    if (host?.notificationsEnabled && host.expoPushToken) {
+      await push.sendPush({
+        to: host.expoPushToken,
+        title: 'Payment received',
+        body: `${share?.attendee?.name ?? 'A guest'} paid their share of ${share?.split.event.title}.`,
+        data: { eventId: share?.split.eventId },
+      });
+    }
+  } catch (err) {
+    logger.warn({ err, shareId }, 'webhook: host push notification failed');
+  }
 }

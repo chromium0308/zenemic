@@ -60,9 +60,6 @@ const schema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_CURRENCY: z.string().default('gbp'),
 
-  // Transport for London (optional).
-  TFL_APP_KEY: z.string().optional(),
-
   // Object storage (optional).
   S3_REGION: z.string().optional(),
   S3_BUCKET: z.string().optional(),
@@ -107,7 +104,6 @@ export const features = {
   googleCalendar: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
   googleMaps: Boolean(env.GOOGLE_MAPS_API_KEY),
   stripe: Boolean(env.STRIPE_SECRET_KEY),
-  tfl: Boolean(env.TFL_APP_KEY),
   storage: Boolean(env.S3_BUCKET && env.S3_ACCESS_KEY_ID && env.S3_SECRET_ACCESS_KEY),
   push: true, // Expo push works without an access token unless security is enabled.
   email: Boolean(env.RESEND_API_KEY),

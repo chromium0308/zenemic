@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Zenemic** is an AI event-planning app: describe an event in natural language and it extracts the
 details, builds a planner timeline, and wires up Google Calendar, a Stripe payment split, and
-Maps/TfL links. The repo holds three parts (the Expo app is now **wired to the backend**; the
+Maps links. The repo holds three parts (the Expo app is now **wired to the backend**; the
 keyboard prototype is not yet):
 
 - **`main-app/`** — the shipping **Expo / React Native** iOS app (the product UI).
@@ -66,7 +66,7 @@ because one calls the other.
 
 - **`packages/shared` (`@zenemic/shared`) is the brain.** It owns the Prisma client + schema, Supabase
   token verification, the Anthropic AI pipeline (`src/ai`), the integration clients (`src/integrations`:
-  Calendar/Maps/Stripe/TfL/storage/email/push), and the **domain services** in `src/domain`
+  Calendar/Maps/Stripe/storage/email/push), and the **domain services** in `src/domain`
   (`events.service` = extract/create/getEvent, `resources.service` = the chart/calendar/split/links
   pipeline, `splitter.service`, `profile`). Everything is re-exported from `src/index.ts`; consumers
   import from `@zenemic/shared`, never by deep path.

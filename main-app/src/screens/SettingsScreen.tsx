@@ -10,6 +10,7 @@ import { ZenToggle } from '../components/ZenToggle';
 import { Spinner } from '../components/Spinner';
 import { useAuth } from '../lib/auth';
 import { api, ApiError } from '../lib/api';
+import { registerForPushNotificationsAsync } from '../lib/push';
 import { splitModeLabel } from '../lib/format';
 import type { Profile, SplitMode } from '../types/api';
 import { ScreenProps } from '../navigation/types';
@@ -59,6 +60,19 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
     if (!profile) return;
     const next = SPLIT_CYCLE[(SPLIT_CYCLE.indexOf(profile.defaultSplitMode) + 1) % SPLIT_CYCLE.length];
     patch({ defaultSplitMode: next }, { defaultSplitMode: next });
+  };
+
+  const toggleNotifications = async (next: boolean) => {
+    if (!next) {
+      patch({ notificationsEnabled: false }, { notificationsEnabled: false });
+      return;
+    }
+    // Turning notifications on: also grab this device's push token, if available.
+    const token = await registerForPushNotificationsAsync().catch(() => null);
+    patch(
+      { notificationsEnabled: true, ...(token ? { expoPushToken: token } : {}) },
+      { notificationsEnabled: true },
+    );
   };
 
   const connectCalendar = async () => {
@@ -157,7 +171,7 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
               </Row>
 
               <Row label="Notifications" isLast>
-                <ZenToggle on={!!profile?.notificationsEnabled} onChange={(next) => patch({ notificationsEnabled: next }, { notificationsEnabled: next })} />
+                <ZenToggle on={!!profile?.notificationsEnabled} onChange={toggleNotifications} />
               </Row>
             </View>
 

@@ -25,7 +25,7 @@ export { notFoundHandler, errorHandler } from './middleware/error';
 export * from './ai';
 
 // ── Integrations (namespaced) ──────────────────────────────────────────────
-// stripe, googleCalendar, googleMaps, tfl, storage, push, email.
+// stripe, googleCalendar, googleMaps, storage, push, email.
 export * from './integrations';
 
 // ── Domain services ────────────────────────────────────────────────────────

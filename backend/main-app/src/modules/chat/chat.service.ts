@@ -7,6 +7,7 @@ import { runEventChat, draftMessage, itemizeReceipt, type ReceiptImage } from '@
 import { prompts } from '@zenemic/shared';
 import { splitStatusSummary } from '@zenemic/shared';
 import { storage } from '@zenemic/shared';
+import { googleMaps } from '@zenemic/shared';
 
 async function loadOwnedEvent(userId: string, eventId: string) {
   const event = await prisma.event.findUnique({
@@ -139,6 +140,26 @@ export async function sendMessage(userId: string, eventId: string, input: SendMe
         required: ['purpose'],
       },
     },
+    {
+      name: 'get_travel_time',
+      description:
+        "Estimate travel time + distance to this event's venue from a starting place the user names. Use for questions like \"how long to get there from X\" or \"how far is the venue\". Defaults to public transport.",
+      input_schema: {
+        type: 'object',
+        properties: {
+          from: {
+            type: 'string',
+            description: 'Where the person is travelling from — a place name or address.',
+          },
+          mode: {
+            type: 'string',
+            enum: ['transit', 'driving', 'walking', 'bicycling'],
+            description: 'Travel mode; defaults to transit (public transport).',
+          },
+        },
+        required: ['from'],
+      },
+    },
   ];
 
   const executeTool = async (name: string, rawInput: unknown): Promise<string> => {
@@ -153,6 +174,24 @@ export async function sendMessage(userId: string, eventId: string, input: SendMe
       }
       case 'draft_group_message':
         return draftMessage(String(args.purpose ?? ''), eventSummary(event));
+      case 'get_travel_time': {
+        if (!googleMaps.googleMapsEnabled) {
+          return 'Travel estimates need Google Maps configured on the server, which it currently isn’t.';
+        }
+        const from = String(args.from ?? '').trim();
+        if (!from) return 'Ask the host where they’re travelling from first.';
+        const allowed = ['transit', 'driving', 'walking', 'bicycling'] as const;
+        const mode = (allowed as readonly string[]).includes(String(args.mode))
+          ? (String(args.mode) as (typeof allowed)[number])
+          : 'transit';
+        const est = await googleMaps.getTravelEstimate({
+          origin: from,
+          destination: event.location,
+          mode,
+        });
+        if (!est) return `Couldn't find a ${mode} route from "${from}" to ${event.location}.`;
+        return `By ${est.mode}, ${from} → ${event.location} is about ${est.durationText} (${est.distanceText}).`;
+      }
       default:
         return `Unknown tool: ${name}`;
     }

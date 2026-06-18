@@ -2,7 +2,7 @@
 
 A small npm-workspaces monorepo with **two independently runnable backend services** that
 share one Prisma schema/DB, Supabase auth, the Anthropic AI pipeline, and the
-Calendar/Maps/Stripe/TfL integrations:
+Calendar/Maps/Stripe integrations:
 
 | Package | What | Port |
 | --- | --- | --- |

@@ -68,8 +68,8 @@ function EventResultCard({ data, onDismiss, onConfirm }) {
             tint="#635BFF"
             icon={<StripeIcon />}
             label="Stripe · Payment split"
-            title={`$${data.total} ÷ ${data.guests.length + 1}`}
-            summary={`$${(data.total / (data.guests.length + 1)).toFixed(2)} per person`}
+            title={`€${data.total} ÷ ${data.guests.length + 1}`}
+            summary={`€${(data.total / (data.guests.length + 1)).toFixed(2)} per person`}
             sub={`${data.guests.length} pending requests`}
             onClick={() => setDetail('payment')}
             avatars={['You', ...data.guests]}
@@ -320,7 +320,7 @@ function CalendarDetail({ data, onBack }) {
           background: 'rgba(139,92,246,0.06)',
           border: '1px solid rgba(139,92,246,0.18)',
         }}>
-          Dinner reservation auto-detected. Bill ${data.total} split across {data.guests.length + 1} people via Stripe. Reminder set for 1 hour before.
+          Dinner reservation auto-detected. Bill €{data.total} split across {data.guests.length + 1} people via Stripe. Reminder set for 1 hour before.
         </div>
       </Field>
 
@@ -352,7 +352,7 @@ function PaymentDetail({ data, onBack }) {
       tint="#635BFF"
       icon={<StripeIcon />}
       label="STRIPE · PAYMENT SPLIT"
-      title={`$${data.total} bill`}
+      title={`€${data.total} bill`}
       onBack={onBack}
       footer={
         <React.Fragment>
@@ -371,10 +371,10 @@ function PaymentDetail({ data, onBack }) {
       }}>
         <div style={{ fontSize: 11, color: '#a8a4ff', fontWeight: 600, letterSpacing: 0.5 }}>BILL TOTAL</div>
         <div style={{ fontSize: 36, color: '#fff', fontWeight: 700, marginTop: 4, fontFamily: 'SF Pro Display, -apple-system, system-ui' }}>
-          ${data.total.toFixed(2)}
+          €{data.total.toFixed(2)}
         </div>
         <div style={{ fontSize: 12, color: KB.textDim, marginTop: 4 }}>
-          Splitting across {people.length} people · Status: {subtotal === data.total ? '✓ Balanced' : `${subtotal > data.total ? 'Over' : 'Under'} by $${Math.abs(subtotal - data.total).toFixed(2)}`}
+          Splitting across {people.length} people · Status: {subtotal === data.total ? '✓ Balanced' : `${subtotal > data.total ? 'Over' : 'Under'} by €${Math.abs(subtotal - data.total).toFixed(2)}`}
         </div>
       </div>
 
@@ -410,7 +410,7 @@ function PaymentDetail({ data, onBack }) {
               <div style={{
                 minWidth: 64, textAlign: 'center', fontSize: 14, color: '#fff',
                 fontWeight: 600, background: '#0f0f10', padding: '6px 8px', borderRadius: 8,
-              }}>${shares[i].toFixed(2)}</div>
+              }}>€{shares[i].toFixed(2)}</div>
               <button onClick={() => adjust(i, 1)} style={stepBtn}>+</button>
             </div>
           ))}
@@ -504,7 +504,7 @@ function MapDetail({ data, onBack }) {
 
       <Field label="Place">
         <div style={{ fontSize: 14, color: '#fff', fontWeight: 600 }}>Bottega</div>
-        <div style={{ fontSize: 13, color: KB.textDim, marginTop: 2 }}>Italian · $$ · ★ 4.6 (1,243 reviews)</div>
+        <div style={{ fontSize: 13, color: KB.textDim, marginTop: 2 }}>Italian · €€ · ★ 4.6 (1,243 reviews)</div>
         <div style={{ fontSize: 13, color: KB.textDim, marginTop: 4 }}>313 Valencia St, San Francisco, CA</div>
         <div style={{ fontSize: 13, color: '#4ade80', marginTop: 4 }}>Open until 11:00 PM</div>
       </Field>

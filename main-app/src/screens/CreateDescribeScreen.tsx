@@ -11,7 +11,7 @@ import { ScreenProps } from '../navigation/types';
 
 const EXAMPLES = [
   'Birthday dinner for Mira at Sister Ray, Saturday 7th June at 7:30. Wines on me, food split evenly. 12 people total.',
-  "Mountain cabin trip in the Lake District 14-16 June, 6 of us. Cabin's £720, split 6 ways. Bring waterproofs.",
+  "Mountain cabin trip in the Lake District 14-16 June, 6 of us. Cabin's €720, split 6 ways. Bring waterproofs.",
   'Q3 team offsite, Margate 24-25 June. Travel + hotel covered by the company card.',
 ];
 

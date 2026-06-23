@@ -23,7 +23,7 @@ Organizing a get-together usually means juggling a group chat, a calendar app, a
 "who owes what" spreadsheet. Zenemic collapses all of that into a single step: **describe the plan
 the way you'd say it out loud**, and let the app handle the logistics.
 
-> *"Friday 8pm dinner at Bottega with Sam, Alex and Priya — split the £180 bill."*
+> *"Friday 8pm dinner at Bottega with Sam, Alex and Priya — split the €180 bill."*
 
 From one sentence, Zenemic understands the **what, when, where, who, and how much** — then sets up
 everything needed to make it happen and keep everyone on the same page.

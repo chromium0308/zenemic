@@ -85,7 +85,7 @@ export const CHART_DATA: Record<string, Chart> = {
       { tag: 'KEY', t: '15:30', heading: 'Dessert & toast', kind: 'next',
         body: 'Sticky toffee pudding out. Quick toast to the housewarming officially being over.' },
       { tag: 'WRAP', t: '17:00', heading: 'Tea, settle, send-off', kind: 'next',
-        body: 'Coffee + tea + leftover assignments. Trigger the splitter (£15 a head). Everyone home before sundown.' },
+        body: 'Coffee + tea + leftover assignments. Trigger the splitter (€15 a head). Everyone home before sundown.' },
     ],
   },
 };

@@ -58,7 +58,7 @@ const schema = z.object({
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_PUBLISHABLE_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
-  STRIPE_CURRENCY: z.string().default('gbp'),
+  STRIPE_CURRENCY: z.string().default('eur'),
 
   // Object storage (optional).
   S3_REGION: z.string().optional(),

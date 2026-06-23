@@ -285,7 +285,7 @@ function PromptPanel({ text, listening, onClose, onSubmit }) {
           fontFamily: '-apple-system, system-ui', whiteSpace: 'pre-wrap',
           wordBreak: 'break-word',
         }}>
-          {text || 'Try: "Friday 8pm dinner at Bottega with Sam, Alex, Priya — split $180"'}
+          {text || 'Try: "Friday 8pm dinner at Bottega with Sam, Alex, Priya — split €180"'}
           {listening && <span style={cursorStyle} />}
         </div>
         <div style={{

@@ -4,7 +4,7 @@
 
 Zenemic is a custom keyboard for an event-organising app. Visually and behaviourally it's an **iOS-style dark keyboard**, with one addition: a circular brand button in the top-left of the suggestion bar (where Google's "G" would be on Gboard).
 
-Tapping that button puts the keyboard into a "listening" mode — the keyboard expands vertically, opens a prompt panel, and the user describes an event in natural language ("Friday 8pm dinner at Bottega with Sam, Alex, Priya — split the $180 bill"). When the user hits Generate, the prompt is sent to a backend that:
+Tapping that button puts the keyboard into a "listening" mode — the keyboard expands vertically, opens a prompt panel, and the user describes an event in natural language ("Friday 8pm dinner at Bottega with Sam, Alex, Priya — split the €180 bill"). When the user hits Generate, the prompt is sent to a backend that:
 
 1. Parses it with the **Anthropic API** into a structured event payload
 2. Creates a **Google Calendar** event
@@ -113,7 +113,7 @@ Structure:
 - Header (8px padding, 10px gap): 32px Zenemic logo, label "ZENEMIC · GENERATED" (11px/600 dim caps), title (17px/600 white), close button
 - Scrollable section list (10px gap):
   - **Calendar card** — tint `#4285F4`. Icon, label, "Event created" title, when/where lines.
-  - **Stripe card** — tint `#635BFF`. Title `$<total> ÷ <n>`, per-person amount summary, overlapping avatar stack (22px circles, -7px overlap, 2px `#18181a` border).
+  - **Stripe card** — tint `#635BFF`. Title `€<total> ÷ <n>`, per-person amount summary, overlapping avatar stack (22px circles, -7px overlap, 2px `#18181a` border).
   - **Map card** — tint `#34A853`. Same header, then a 90px stylised map SVG with a route line in brand pink, a place-label pill, then text rows.
   - Each card has 16px radius, `#18181a` bg, 1px divider border, chevron-right at the right edge, brand-tinted "READY" pill, and press feedback (`background: #222225`, 99% scale).
 - Hint line: "Tap any card to review or edit before confirming" (11px dim, centred)
@@ -138,16 +138,16 @@ Each card opens a full-screen sub-view that slides in from the right (`zen-slide
 - Reminders — `RowItem` list with right-aligned values, "+ Add reminder" muted row
 
 #### Stripe detail
-- Big total card — 18px padding, gradient bg `linear-gradient(135deg, #635BFF22, #635BFF08)` with `rgba(99,91,255,0.25)` border. 36px/700 dollar amount. Live balance status under it (✓ Balanced or "Over by $X").
+- Big total card — 18px padding, gradient bg `linear-gradient(135deg, #635BFF22, #635BFF08)` with `rgba(99,91,255,0.25)` border. 36px/700 euro amount. Live balance status under it (✓ Balanced or "Over by €X").
 - Split-method segmented control — `Equal / By share / By item` (active = `#2a2a2c`, inactive = transparent text dim)
-- Per-person rows — avatar, name, sub-text (email / payment method / "Host · already paid"), `−` button, amount pill (`#0f0f10` bg, 64px min width), `+` button. Stepper bumps are ±$1.
+- Per-person rows — avatar, name, sub-text (email / payment method / "Host · already paid"), `−` button, amount pill (`#0f0f10` bg, 64px min width), `+` button. Stepper bumps are ±€1.
 - Options — RowItems with mini iOS toggles (32×18px pill, 14px knob, brand-pink when on / `#3a3a3c` when off)
 
 #### Map detail
 - Larger 200px map preview at top
 - Transport mode picker — 4 cells (Drive / Transit / Walk / Bike) with emoji, big duration, small label. Active cell uses `rgba(52,168,83,0.18)` bg + green border.
 - Turn-by-turn list — 28px direction badges (`↑ ↱ ↰ ●`), step text, distance subtext. Final "Arrive at <venue>" row uses green tint.
-- Place card — venue name, "Italian · $$ · ★ 4.6", address, hours status (green if open).
+- Place card — venue name, "Italian · €€ · ★ 4.6", address, hours status (green if open).
 
 Footer: "Share link" (secondary) + "Open in Google Maps" (green primary).
 
@@ -278,7 +278,7 @@ Family: `-apple-system, "SF Pro Display", BlinkMacSystemFont, system-ui, sans-se
 | Card title           | 15px | 600    |
 | Caps label           | 11px | 600    |
 | Body                 | 13–14px | 400 |
-| Big total ($)        | 36px | 700    |
+| Big total (€)        | 36px | 700    |
 
 ### Border radius
 - Keys: 5px

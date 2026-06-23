@@ -142,7 +142,7 @@ async function callZenemicAPI(prompt) {
   //     when:    string,              // formatted human-readable, e.g. "Fri, May 30 · 8:00 – 10:30 PM"
   //     where:   string,              // "Venue · address"
   //     guests:  string[],            // ["Sam", "Alex", "Priya"]
-  //     total:   number,              // bill total in dollars
+  //     total:   number,              // bill total in euros
   //     // optional fields used by detail views:
   //     calendarEventId?: string,
   //     stripeRequestIds?: string[],

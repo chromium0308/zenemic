@@ -20,7 +20,7 @@ export function toMajor(amountMinor: number, currency: string): number {
   return amountMinor / minorUnitFactor(currency);
 }
 
-/** Parse a free-text budget like "£480", "$3,200", "860" into minor units. */
+/** Parse a free-text budget like "€480", "$3,200", "860" into minor units. */
 export function parseBudgetToMinor(input: string | number | null | undefined, currency: string): number | null {
   if (input == null) return null;
   if (typeof input === 'number') return toMinor(input, currency);
@@ -32,7 +32,7 @@ export function parseBudgetToMinor(input: string | number | null | undefined, cu
 
 const SYMBOLS: Record<string, string> = { gbp: '£', usd: '$', eur: '€' };
 
-/** Format minor units for display, e.g. (15800, "gbp") -> "£158.00". */
+/** Format minor units for display, e.g. (15800, "eur") -> "€158.00". */
 export function formatMoney(amountMinor: number, currency: string): string {
   const symbol = SYMBOLS[currency.toLowerCase()] ?? '';
   const major = toMajor(amountMinor, currency);

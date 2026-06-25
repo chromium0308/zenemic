@@ -33,9 +33,13 @@ export function KeyboardSetupScreen({ navigation }: ScreenProps<'Keyboard'>) {
           <View style={{ borderWidth: 0.5, borderColor: t.hairline, borderRadius: RADIUS.lg, padding: 14, backgroundColor: t.surface }}>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>PREVIEW</ZenText>
 
+            {/* `height: undefined` is the key: it drops the image's intrinsic pixel
+                height so `width: '100%'` + `aspectRatio` actually govern the size.
+                Without it RN keeps the full-resolution dimensions and the image
+                overflows; `resizeMode="contain"` then shows the whole keyboard. */}
             <Image
               source={require('../../assets/keyboard.png')}
-              style={{ width: '100%', aspectRatio: 1170 / 816, borderRadius: RADIUS.md, backgroundColor: '#1c1c1e' }}
+              style={{ width: '100%', height: undefined, aspectRatio: 1170 / 816, borderRadius: RADIUS.md, backgroundColor: '#1c1c1e' }}
               resizeMode="contain"
             />
 

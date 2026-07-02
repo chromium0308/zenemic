@@ -17,7 +17,6 @@
       "backgroundColor": "#f8f6f1",
       "resizeMode": "contain"
     },
-    "plugins": [],
-    "newArchEnabled": false
+    "plugins": []
   }
 }

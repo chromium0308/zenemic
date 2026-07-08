@@ -11,11 +11,8 @@ import { Spinner } from '../components/Spinner';
 import { useAuth } from '../lib/auth';
 import { api, ApiError } from '../lib/api';
 import { registerForPushNotificationsAsync } from '../lib/push';
-import { splitModeLabel } from '../lib/format';
-import type { Profile, SplitMode } from '../types/api';
+import type { Profile } from '../types/api';
 import { ScreenProps } from '../navigation/types';
-
-const SPLIT_CYCLE: SplitMode[] = ['EVEN', 'BY_SHARE', 'BY_ITEM'];
 
 export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
   const t = useTheme();
@@ -54,12 +51,6 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
     setEditingName(false);
     const name = nameInput.trim();
     if (name.length > 1 && name !== profile?.name) patch({ name }, { name });
-  };
-
-  const cycleSplit = () => {
-    if (!profile) return;
-    const next = SPLIT_CYCLE[(SPLIT_CYCLE.indexOf(profile.defaultSplitMode) + 1) % SPLIT_CYCLE.length];
-    patch({ defaultSplitMode: next }, { defaultSplitMode: next });
   };
 
   const toggleNotifications = async (next: boolean) => {
@@ -160,10 +151,6 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
 
               <Row label="Keyboard status" isLast={false} onPress={() => navigation.navigate('Keyboard')}>
                 <Value text="Set up ›" accent />
-              </Row>
-
-              <Row label="Default budget split" isLast={false} onPress={cycleSplit}>
-                <Value text={profile ? splitModeLabel(profile.defaultSplitMode) : '—'} />
               </Row>
 
               <Row label="Calendar" isLast={false} onPress={profile?.googleCalendarConnected ? undefined : connectCalendar}>

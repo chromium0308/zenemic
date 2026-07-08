@@ -9,7 +9,7 @@ import { ZenButton } from '../components/ZenButton';
 import { ZenInput } from '../components/ZenInput';
 import { ChartTimeline } from '../components/ChartTimeline';
 import { Spinner } from '../components/Spinner';
-import { IconEdit, IconSpark } from '../icons';
+import { IconEdit } from '../icons';
 import { api, ApiError } from '../lib/api';
 import type { ApiChart, ApiStage } from '../types/api';
 import { ScreenProps } from '../navigation/types';
@@ -56,18 +56,6 @@ export function PlannerChartScreen({ navigation, route }: ScreenProps<'PlannerCh
       await api.setStageDone(ev.id, s.id, next);
     } catch {
       setChart((c) => (c ? { ...c, stages: c.stages.map((x) => (x.id === s.id ? { ...x, done: s.done } : x)) } : c));
-    }
-  };
-
-  const regenerate = async () => {
-    setBusy(true);
-    setError(null);
-    try {
-      setChart(await api.regenerateChart(ev.id));
-    } catch (e) {
-      setError((e as ApiError).message);
-    } finally {
-      setBusy(false);
     }
   };
 
@@ -118,17 +106,9 @@ export function PlannerChartScreen({ navigation, route }: ScreenProps<'PlannerCh
                     {String(doneCount).padStart(2, '0')} / {String(stages.length).padStart(2, '0')} DONE
                   </ZenText>
                 </View>
-                {busy ? (
-                  <View style={{ alignItems: 'center', paddingVertical: 8 }}>
-                    <Spinner />
-                  </View>
-                ) : null}
                 <ChartTimeline stages={stages} done={stages.map((s) => s.done)} onToggle={toggle} />
                 {error ? <ZenText variant="body" style={{ color: t.danger }}>{error}</ZenText> : null}
-                <View style={{ flexDirection: 'row', gap: 10, marginTop: 4 }}>
-                  <ZenButton label={busy ? 'Working…' : 'Regenerate'} variant="ghost" leading={<IconSpark color={t.fg} />} style={{ flex: 1 }} fullWidth={false} onPress={busy ? undefined : regenerate} />
-                  <ZenButton label="Edit chart" variant="ghost" leading={<IconEdit color={t.fg} />} style={{ flex: 1 }} fullWidth={false} onPress={startEdit} />
-                </View>
+                <ZenButton label="Edit chart" variant="ghost" leading={<IconEdit color={t.fg} />} style={{ marginTop: 4 }} onPress={startEdit} />
               </>
             ) : (
               <>

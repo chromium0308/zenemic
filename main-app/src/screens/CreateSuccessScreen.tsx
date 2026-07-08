@@ -80,8 +80,17 @@ export function CreateSuccessScreen({ navigation }: ScreenProps<'CreateSuccess'>
           label="Open event"
           variant="primary"
           onPress={() => {
-            if (created) navigation.replace('EventDetail', { event: created });
-            else navigation.popToTop();
+            // Rebuild the stack as Events → EventDetail so backing out of the event
+            // lands on the events list, not the already-completed create flow (which
+            // would otherwise re-run CreateProcessing and recreate the event).
+            if (created) {
+              navigation.reset({
+                index: 1,
+                routes: [{ name: 'Events' }, { name: 'EventDetail', params: { event: created } }],
+              });
+            } else {
+              navigation.popToTop();
+            }
           }}
         />
         <ZenButton label="Back to events" variant="ghost" onPress={() => navigation.popToTop()} />

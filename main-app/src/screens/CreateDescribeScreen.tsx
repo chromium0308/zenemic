@@ -30,6 +30,7 @@ export function CreateDescribeScreen({ navigation }: ScreenProps<'CreateDescribe
         onBack={() => navigation.goBack()}
         progress={1}
         total={4}
+        showMenu={false}
       />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <Section paddingTop={28} gap={24}>

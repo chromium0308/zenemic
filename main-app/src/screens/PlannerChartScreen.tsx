@@ -86,7 +86,7 @@ export function PlannerChartScreen({ navigation, route }: ScreenProps<'PlannerCh
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <ZenChrome label="EVENT PLANNER CHART" onBack={() => navigation.goBack()} />
+      <ZenChrome label="EVENT PLANNER CHART" onBack={() => navigation.goBack()} showMenu={false} />
       {loading && !chart ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Spinner size={22} borderWidth={2} />

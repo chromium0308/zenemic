@@ -68,7 +68,7 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
   if (extracting) {
     return (
       <View style={{ flex: 1, backgroundColor: t.bg }}>
-        <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} />
+        <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} showMenu={false} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 14 }}>
           <Spinner size={24} borderWidth={2} />
           <ZenText variant="eyebrow" tone="fg3">READING MESSAGE</ZenText>
@@ -83,7 +83,7 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
   if (error) {
     return (
       <View style={{ flex: 1, backgroundColor: t.bg }}>
-        <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} />
+        <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} showMenu={false} />
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 16 }}>
           <ZenText variant="eyebrow" tone="fg3">EXTRACTION FAILED</ZenText>
           <ZenText variant="body" style={{ textAlign: 'center', maxWidth: 280 }}>{error}</ZenText>
@@ -105,7 +105,7 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg }}>
-      <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} />
+      <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} showMenu={false} />
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
         <Section paddingTop={28} gap={22}>
           <View>

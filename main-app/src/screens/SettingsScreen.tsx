@@ -98,6 +98,15 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
     );
   };
 
+  const reportBug = async () => {
+    const to = 'miravvaitha@gmail.com,shaurya@kapoor.com';
+    const url = `mailto:${to}?subject=${encodeURIComponent('Zenemic bug report')}`;
+    try {
+      await Linking.openURL(url);
+    } catch {
+    }
+  };
+
   const initials = (profile?.name ?? '')
     .split(' ')
     .map((w) => w[0])
@@ -166,6 +175,18 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
 
             <ZenButton label="Log out" variant="ghost" onPress={() => signOut()} />
             <ZenButton label="Delete account" variant="danger" onPress={confirmDelete} />
+
+            <View style={{ gap: 8, marginTop: 4 }}>
+              <ZenText variant="eyebrow" tone="fg3">FOUND A BUG?</ZenText>
+              <ZenText variant="body" tone="fg2">
+                Spotted something broken or have feedback? Tap to email us — we’d love to hear it.
+              </ZenText>
+              <Pressable onPress={reportBug} hitSlop={8}>
+                <ZenText style={{ fontFamily: FONTS.monoMedium, fontSize: 13, letterSpacing: 0.3, color: t.accent }}>
+                  miravvaitha@gmail.com  ·  shaurya@kapoor.com  ›
+                </ZenText>
+              </Pressable>
+            </View>
           </Section>
         </ScrollView>
       )}

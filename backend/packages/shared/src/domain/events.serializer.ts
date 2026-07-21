@@ -9,6 +9,7 @@ import type {
   Stage,
 } from '@prisma/client';
 import { formatMoney, toMajor } from '../lib/money';
+import { deriveEventKind } from './eventKind';
 
 export function serializeEvent(event: Event) {
   return {
@@ -18,7 +19,7 @@ export function serializeEvent(event: Event) {
     time: event.timeLabel,
     startsAt: event.startsAt,
     endsAt: event.endsAt,
-    kind: event.kind.toLowerCase(),
+    kind: deriveEventKind(event.startsAt, event.endsAt).toLowerCase(),
     status: event.status.toLowerCase(),
     location: event.location,
     coordinates:

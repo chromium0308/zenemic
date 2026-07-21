@@ -13,6 +13,7 @@ import {
   serializeSplit,
   serializeReceipt,
 } from './events.serializer';
+import { deriveEventKind } from './eventKind';
 import type { EventKind, RsvpStatus, StageKind, StageTag } from '@prisma/client';
 import type { SupabaseIdentity } from '../lib/supabase';
 import { ensureProfile } from './profile';
@@ -48,14 +49,6 @@ export async function extractDraft(
   return extractEvent(message, { ...opts, fallbackCurrency: env.STRIPE_CURRENCY });
 }
 
-function inferKind(startsAt: Date | null): 'PLANNED' | 'ONGOING' | 'PREVIOUS' {
-  if (!startsAt) return 'PLANNED';
-  const now = new Date();
-  const sameDay = startsAt.toDateString() === now.toDateString();
-  if (sameDay) return 'ONGOING';
-  return startsAt < now ? 'PREVIOUS' : 'PLANNED';
-}
-
 /**
  * Step 2 of the create flow: persist the confirmed event and generate every
  * automated resource (chart, calendar, splitter, location links, album).
@@ -85,7 +78,7 @@ export async function createEvent(
       timeLabel: input.timeLabel,
       startsAt,
       endsAt,
-      kind: input.kind ?? inferKind(startsAt),
+      kind: input.kind ?? deriveEventKind(startsAt, endsAt),
       status: 'DRAFT',
       location: input.locationName,
       attendeesCount: Math.max(input.attendees, guestRows.length + 1),
@@ -105,11 +98,15 @@ export async function createEvent(
 }
 
 export async function listEvents(userId: string, kind?: EventKind) {
+  // `kind` is derived live in serializeEvent, so filter on the serialized value
+  // rather than the stored column (which is only a best-effort snapshot).
   const events = await prisma.event.findMany({
-    where: { userId, ...(kind ? { kind } : {}) },
+    where: { userId },
     orderBy: { startsAt: 'desc' },
   });
-  return events.map(serializeEvent);
+  const serialized = events.map(serializeEvent);
+  const wanted = kind?.toLowerCase();
+  return wanted ? serialized.filter((e) => e.kind === wanted) : serialized;
 }
 
 async function loadOwned(userId: string, eventId: string) {
@@ -161,7 +158,7 @@ export async function regenerateChart(userId: string, eventId: string) {
     budgetLabel: null,
     splitMode: event.splitMode,
     sourceMessage: event.sourceMessage,
-    kind: event.kind,
+    kind: deriveEventKind(event.startsAt, event.endsAt),
   });
   await prisma.$transaction([
     prisma.stage.deleteMany({ where: { eventId } }),

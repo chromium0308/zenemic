@@ -32,6 +32,7 @@ export * from './integrations';
 export * as events from './domain/events.service';
 export * as resources from './domain/resources.service';
 export * from './domain/events.serializer'; // serializeEvent/Stage/AlbumPhoto/Chart/Attendee/Split/Receipt
+export { deriveEventKind, type EventKindValue } from './domain/eventKind';
 export * from './domain/splitter.service'; // createOrUpdateSplit, sendSplitRequests, setSplitShares, getSplit, splitStatusSummary
 export { ensureProfile, toPublicUser } from './domain/profile';
 

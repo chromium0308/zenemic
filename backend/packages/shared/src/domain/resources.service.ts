@@ -6,6 +6,7 @@ import * as maps from '../integrations/googleMaps';
 import * as calendar from '../integrations/googleCalendar';
 import * as storage from '../integrations/storage';
 import { createOrUpdateSplit } from './splitter.service';
+import { deriveEventKind } from './eventKind';
 
 export interface ResourceReport {
   chart: boolean;
@@ -47,7 +48,7 @@ export async function generateResources(eventId: string): Promise<ResourceReport
       budgetLabel: event.budgetMinor != null ? formatMoney(event.budgetMinor, event.currency) : null,
       splitMode: event.splitMode,
       sourceMessage: event.sourceMessage,
-      kind: event.kind,
+      kind: deriveEventKind(event.startsAt, event.endsAt),
     });
     await prisma.stage.deleteMany({ where: { eventId } });
     await prisma.stage.createMany({

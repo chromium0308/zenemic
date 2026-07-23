@@ -2,6 +2,7 @@ import { ZenEvent } from './events';
 
 export type StageKind = 'past' | 'current' | 'next';
 export type StageTag = 'SETUP' | 'PRE' | 'TRAVEL' | 'LIVE' | 'KEY' | 'WRAP';
+export const STAGE_TAGS: StageTag[] = ['SETUP', 'PRE', 'TRAVEL', 'LIVE', 'KEY', 'WRAP'];
 
 export interface Stage {
   tag: StageTag;

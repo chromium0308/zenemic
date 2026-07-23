@@ -114,9 +114,11 @@ function ChartStageRow({ stage, done, onToggle }: { stage: Stage; done: boolean;
         >
           {stage.heading}
         </ZenText>
-        <ZenText style={{ marginTop: 6, fontSize: 13.5, lineHeight: 20, color: t.fg2 }}>
-          {stage.body}
-        </ZenText>
+        {stage.body ? (
+          <ZenText style={{ marginTop: 6, fontSize: 13.5, lineHeight: 20, color: t.fg2 }}>
+            {stage.body}
+          </ZenText>
+        ) : null}
       </View>
     </View>
   );

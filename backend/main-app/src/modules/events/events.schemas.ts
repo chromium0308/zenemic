@@ -44,7 +44,7 @@ const stageInput = z.object({
   tag: z.enum(['SETUP', 'PRE', 'TRAVEL', 'LIVE', 'KEY', 'WRAP']),
   t: z.string().min(1),
   heading: z.string().min(1),
-  body: z.string().min(1),
+  body: z.string(), // optional detail — a stage like "Doors open" needs no body
   kind: z.enum(['PAST', 'CURRENT', 'NEXT']),
   done: z.boolean().optional(),
 });

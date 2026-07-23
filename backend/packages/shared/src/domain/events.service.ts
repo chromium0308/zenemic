@@ -1,10 +1,14 @@
 import type { Prisma } from '@prisma/client';
 import { prisma } from '../lib/prisma';
-import { notFound, forbidden } from '../lib/errors';
+import { notFound, forbidden, conflict, badRequest } from '../lib/errors';
 import { parseBudgetToMinor } from '../lib/money';
 import { extractEvent, generateChart, type ExtractedEvent } from '../ai';
 import { env } from '../config/env';
+import { logger } from '../config/logger';
+import * as maps from '../integrations/googleMaps';
+import * as calendar from '../integrations/googleCalendar';
 import { generateResources, type ResourceReport } from './resources.service';
+import { createOrUpdateSplit } from './splitter.service';
 import {
   serializeEvent,
   serializeChart,
@@ -222,23 +226,186 @@ export async function updateAttendeeRsvp(
   return serializeAttendee(updated);
 }
 
-export async function updateEvent(
-  userId: string,
-  eventId: string,
-  patch: Partial<{ title: string; dateLabel: string; timeLabel: string; location: string; splitMode: 'EVEN' | 'BY_SHARE' | 'BY_ITEM' }>,
-) {
-  await loadOwned(userId, eventId);
-  const event = await prisma.event.update({
-    where: { id: eventId },
-    data: {
-      ...(patch.title != null ? { title: patch.title } : {}),
-      ...(patch.dateLabel != null ? { dateLabel: patch.dateLabel } : {}),
-      ...(patch.timeLabel != null ? { timeLabel: patch.timeLabel } : {}),
-      ...(patch.location != null ? { location: patch.location } : {}),
-      ...(patch.splitMode != null ? { splitMode: patch.splitMode } : {}),
-    },
-  });
-  return serializeEvent(event);
+export interface UpdateEventInput {
+  title?: string;
+  dateLabel?: string;
+  timeLabel?: string;
+  location?: string;
+  splitMode?: 'EVEN' | 'BY_SHARE' | 'BY_ITEM';
+  startsAtISO?: string | null;
+  endsAtISO?: string | null;
+  attendees?: number;
+  budget?: string | number | null;
+}
+
+/**
+ * Edit event details (the EventDetail hamburger → EditEvent screen). The DB
+ * write is transactional; downstream resources (maps, calendar, split) are then
+ * re-synced best-effort in isolation, mirroring generateResources.
+ */
+export async function updateEvent(userId: string, eventId: string, patch: UpdateEventInput) {
+  const event = await loadOwned(userId, eventId);
+
+  // Money guard: budget/attendees/splitMode edits recompute the split from
+  // scratch, which is only safe while no share has a live Stripe link or a
+  // recorded guest payment. (The host's share is PAID from creation — that
+  // alone must not lock editing.)
+  const touchesMoney =
+    patch.budget !== undefined || patch.attendees !== undefined || patch.splitMode !== undefined;
+  const moneyLocked =
+    event.split?.shares.some(
+      (s) => s.status === 'REQUESTED' || (s.status === 'PAID' && !s.attendee?.isHost),
+    ) ?? false;
+  if (touchesMoney && moneyLocked) {
+    throw conflict(
+      'Payment requests have already been sent — manage budget and shares in the payment splitter.',
+    );
+  }
+
+  // Timestamps: a present key means "set" (null clears); reject unparseable values.
+  const parseISO = (iso: string | null, field: string) => {
+    if (iso == null) return null;
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) throw badRequest(`Invalid ${field}`);
+    return d;
+  };
+  const timesTouched = patch.startsAtISO !== undefined || patch.endsAtISO !== undefined;
+  const newStartsAt =
+    patch.startsAtISO !== undefined ? parseISO(patch.startsAtISO, 'startsAtISO') : event.startsAt;
+  const newEndsAt =
+    patch.endsAtISO !== undefined ? parseISO(patch.endsAtISO, 'endsAtISO') : event.endsAt;
+
+  // Roster delta: grow with "Guest N" padding rows; shrink by removing trailing
+  // padding rows only — the host and named guests are never deleted.
+  const rosterOps: Prisma.PrismaPromise<unknown>[] = [];
+  let newAttendeesCount: number | undefined;
+  if (patch.attendees !== undefined) {
+    const unnamed = event.attendees.filter((a) => !a.isHost && /^Guest \d+$/.test(a.name));
+    const keptCount = event.attendees.length - unnamed.length; // host + named guests
+    const target = Math.max(patch.attendees, keptCount);
+    newAttendeesCount = target;
+    const delta = target - event.attendees.length;
+    if (delta > 0) {
+      const maxN = unnamed.reduce((m, a) => Math.max(m, Number(a.name.replace('Guest ', ''))), 0);
+      rosterOps.push(
+        prisma.attendee.createMany({
+          data: Array.from({ length: delta }, (_, i) => ({
+            eventId,
+            name: `Guest ${maxN + i + 1}`,
+            isHost: false,
+          })),
+        }),
+      );
+    } else if (delta < 0) {
+      const removeIds = unnamed.slice(delta).map((a) => a.id); // trailing |delta| padding rows
+      rosterOps.push(prisma.attendee.deleteMany({ where: { id: { in: removeIds } } }));
+    }
+  }
+
+  const newBudgetMinor =
+    patch.budget !== undefined ? parseBudgetToMinor(patch.budget, event.currency) : event.budgetMinor;
+  const newSplitMode = patch.splitMode ?? event.splitMode;
+
+  await prisma.$transaction([
+    prisma.event.update({
+      where: { id: eventId },
+      data: {
+        ...(patch.title != null ? { title: patch.title } : {}),
+        ...(patch.dateLabel != null ? { dateLabel: patch.dateLabel } : {}),
+        ...(patch.timeLabel != null ? { timeLabel: patch.timeLabel } : {}),
+        ...(patch.location != null ? { location: patch.location } : {}),
+        ...(patch.splitMode != null ? { splitMode: patch.splitMode } : {}),
+        ...(patch.startsAtISO !== undefined ? { startsAt: newStartsAt } : {}),
+        ...(patch.endsAtISO !== undefined ? { endsAt: newEndsAt } : {}),
+        // Keep the stored kind snapshot in step with the new times (serialization derives live).
+        ...(timesTouched ? { kind: deriveEventKind(newStartsAt, newEndsAt) } : {}),
+        ...(newAttendeesCount !== undefined ? { attendeesCount: newAttendeesCount } : {}),
+        ...(patch.budget !== undefined ? { budgetMinor: newBudgetMinor } : {}),
+      },
+    }),
+    ...rosterOps,
+  ]);
+
+  // Side-effect 1: location changed → re-geocode + rebuild the maps link.
+  const changedLocation = patch.location != null && patch.location !== event.location;
+  if (changedLocation && patch.location != null) {
+    try {
+      const locationUpdate: { locationLat?: number; locationLng?: number; placeId?: string; mapsUrl?: string } = {};
+      let placeId: string | null = null;
+      if (maps.googleMapsEnabled) {
+        const geo = await maps.geocode(patch.location);
+        if (geo) {
+          locationUpdate.locationLat = geo.lat;
+          locationUpdate.locationLng = geo.lng;
+          locationUpdate.placeId = geo.placeId;
+          placeId = geo.placeId;
+        }
+      }
+      locationUpdate.mapsUrl = maps.directionsLink({ destination: patch.location, placeId });
+      await prisma.event.update({ where: { id: eventId }, data: locationUpdate });
+    } catch (err) {
+      logger.warn({ err, eventId }, 'location re-linking failed');
+    }
+  }
+
+  // Side-effect 2: keep the Google Calendar event in sync (silently).
+  const changedTitle = patch.title != null && patch.title !== event.title;
+  if (changedTitle || changedLocation || timesTouched) {
+    try {
+      const full = await prisma.event.findUniqueOrThrow({
+        where: { id: eventId },
+        include: { user: true, attendees: true },
+      });
+      if (calendar.googleCalendarEnabled && full.user.googleRefreshToken) {
+        if (full.calendarEventId) {
+          await calendar.updateCalendarEvent({
+            refreshToken: full.user.googleRefreshToken,
+            calendarId: full.user.googleCalendarId ?? undefined,
+            eventId: full.calendarEventId,
+            ...(changedTitle ? { summary: full.title } : {}),
+            ...(changedLocation ? { location: full.location } : {}),
+            // Never null-out calendar times — only push when both are set.
+            ...(timesTouched && full.startsAt && full.endsAt
+              ? { start: full.startsAt, end: full.endsAt }
+              : {}),
+          });
+        } else if (timesTouched && full.startsAt && full.endsAt) {
+          // The edit added real times to an event that never got a calendar entry.
+          const created = await calendar.createCalendarEvent({
+            refreshToken: full.user.googleRefreshToken,
+            calendarId: full.user.googleCalendarId ?? undefined,
+            summary: full.title,
+            description: full.sourceMessage ?? undefined,
+            location: full.location,
+            start: full.startsAt,
+            end: full.endsAt,
+            attendeeEmails: full.attendees.map((a) => a.email).filter((e): e is string => Boolean(e)),
+          });
+          await prisma.event.update({
+            where: { id: eventId },
+            data: { calendarEventId: created.id, calendarHtmlLink: created.htmlLink },
+          });
+        }
+      }
+    } catch (err) {
+      logger.warn({ err, eventId }, 'calendar re-sync failed');
+    }
+  }
+
+  // Side-effect 3: recompute the split (guard above proved nothing was sent).
+  if (touchesMoney) {
+    try {
+      const total = newBudgetMinor ?? event.split?.totalMinor ?? 0;
+      if (total > 0 && (newBudgetMinor != null || event.split)) {
+        await createOrUpdateSplit(eventId, { totalMinor: total, mode: newSplitMode });
+      }
+    } catch (err) {
+      logger.warn({ err, eventId }, 'split recompute failed');
+    }
+  }
+
+  const fresh = await prisma.event.findUniqueOrThrow({ where: { id: eventId } });
+  return serializeEvent(fresh);
 }
 
 export async function deleteEvent(userId: string, eventId: string): Promise<void> {

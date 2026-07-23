@@ -73,6 +73,37 @@ export async function createCalendarEvent(
   return { id: res.data.id ?? '', htmlLink: res.data.htmlLink ?? '' };
 }
 
+export interface UpdateCalendarEventInput {
+  refreshToken: string;
+  calendarId?: string;
+  eventId: string;
+  summary?: string;
+  location?: string;
+  start?: Date;
+  end?: Date;
+  timeZone?: string;
+}
+
+/** Patch an existing calendar event after an edit (title/location/times). */
+export async function updateCalendarEvent(input: UpdateCalendarEventInput): Promise<void> {
+  const client = oauthClient();
+  client.setCredentials({ refresh_token: input.refreshToken });
+  const calendar = google.calendar({ version: 'v3', auth: client });
+  const timeZone = input.timeZone ?? 'Europe/London';
+
+  await calendar.events.patch({
+    calendarId: input.calendarId ?? 'primary',
+    eventId: input.eventId,
+    sendUpdates: 'none', // silent sync — invites remain an explicit confirm action
+    requestBody: {
+      ...(input.summary != null ? { summary: input.summary } : {}),
+      ...(input.location != null ? { location: input.location } : {}),
+      ...(input.start ? { start: { dateTime: input.start.toISOString(), timeZone } } : {}),
+      ...(input.end ? { end: { dateTime: input.end.toISOString(), timeZone } } : {}),
+    },
+  });
+}
+
 /** Send invites for an already-created event (the keyboard "Confirm all" action). */
 export async function sendCalendarInvites(params: {
   refreshToken: string;

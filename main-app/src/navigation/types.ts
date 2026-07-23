@@ -28,6 +28,7 @@ export type RootStackParamList = {
   Events: undefined;
   // The API event is a superset of ZenEvent, so either passes structurally.
   EventDetail: { event: ZenEvent };
+  EditEvent: { event: ZenEvent };
   PlannerChart: { event: ZenEvent };
   Splitter: { eventId: string; title?: string };
   Album: { eventId: string; title?: string };

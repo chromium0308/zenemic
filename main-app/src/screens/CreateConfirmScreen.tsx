@@ -1,10 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, TextInput, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, View } from 'react-native';
 import { FONTS, RADIUS, useTheme } from '../theme';
 import { ZenChrome } from '../components/ZenChrome';
 import { Section, Anchor } from '../components/Section';
 import { ZenText } from '../components/ZenText';
 import { ZenButton } from '../components/ZenButton';
+import { EditableRow } from '../components/EditableRow';
 import { Spinner } from '../components/Spinner';
 import { api, ApiError } from '../lib/api';
 import { formatBudget, splitModeLabel } from '../lib/format';
@@ -181,88 +182,5 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
         />
       </Anchor>
     </View>
-  );
-}
-
-function EditableRow({
-  label,
-  value,
-  onChange,
-  isLast,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  isLast: boolean;
-}) {
-  const t = useTheme();
-  const [editing, setEditing] = useState(false);
-  const [v, setV] = useState(value);
-  const ref = useRef<TextInput>(null);
-
-  useEffect(() => {
-    if (editing) ref.current?.focus();
-  }, [editing]);
-
-  const commit = () => {
-    onChange(v);
-    setEditing(false);
-  };
-
-  return (
-    <Pressable
-      onPress={() => !editing && setEditing(true)}
-      style={{
-        flexDirection: 'row',
-        alignItems: 'center',
-        paddingVertical: 14,
-        paddingHorizontal: 16,
-        borderBottomWidth: isLast ? 0 : 0.5,
-        borderBottomColor: t.hairline,
-        gap: 12,
-      }}
-    >
-      <ZenText
-        style={{
-          width: 110,
-          fontFamily: FONTS.mono,
-          fontSize: 10.5,
-          letterSpacing: 1.47,
-          textTransform: 'uppercase',
-          color: t.fg3,
-        }}
-      >
-        {label}
-      </ZenText>
-      {editing ? (
-        <TextInput
-          ref={ref}
-          value={v}
-          onChangeText={setV}
-          onBlur={commit}
-          onSubmitEditing={commit}
-          style={{
-            flex: 1,
-            paddingHorizontal: 10,
-            paddingVertical: 6,
-            fontSize: 14,
-            color: t.fg,
-            borderWidth: 0.5,
-            borderColor: t.fg2,
-            borderRadius: 8,
-            backgroundColor: t.bg,
-          }}
-        />
-      ) : (
-        <>
-          <ZenText style={{ flex: 1, fontSize: 14.5, color: t.fg }}>{value}</ZenText>
-          <ZenText
-            style={{ fontFamily: FONTS.mono, fontSize: 10, letterSpacing: 1.2, color: t.fg3 }}
-          >
-            EDIT
-          </ZenText>
-        </>
-      )}
-    </Pressable>
   );
 }

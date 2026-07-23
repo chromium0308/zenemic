@@ -13,6 +13,7 @@ import { ForgotPasswordScreen } from '../screens/ForgotPasswordScreen';
 import { KeyboardSetupScreen } from '../screens/KeyboardSetupScreen';
 import { EventsListScreen } from '../screens/EventsListScreen';
 import { EventDetailScreen } from '../screens/EventDetailScreen';
+import { EditEventScreen } from '../screens/EditEventScreen';
 import { PlannerChartScreen } from '../screens/PlannerChartScreen';
 import { CreateDescribeScreen } from '../screens/CreateDescribeScreen';
 import { CreateConfirmScreen } from '../screens/CreateConfirmScreen';
@@ -65,6 +66,7 @@ export function AppNavigator() {
             <Stack.Group>
               <Stack.Screen name="Events" component={EventsListScreen} />
               <Stack.Screen name="EventDetail" component={EventDetailScreen} />
+              <Stack.Screen name="EditEvent" component={EditEventScreen} />
               <Stack.Screen name="PlannerChart" component={PlannerChartScreen} />
               <Stack.Screen name="Splitter" component={SplitterScreen} />
               <Stack.Screen name="Album" component={AlbumScreen} />

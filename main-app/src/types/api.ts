@@ -33,6 +33,7 @@ export interface Attendee {
 export interface SplitShare {
   id: string;
   name: string;
+  isHost: boolean;
   amount: string;
   amountMinor: number;
   status: 'PENDING' | 'REQUESTED' | 'PAID';

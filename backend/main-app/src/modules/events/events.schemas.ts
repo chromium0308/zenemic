@@ -28,6 +28,11 @@ export const updateEventSchema = z.object({
   timeLabel: z.string().min(1).optional(),
   location: z.string().min(1).optional(),
   splitMode: z.enum(['EVEN', 'BY_SHARE', 'BY_ITEM']).optional(),
+  startsAtISO: z.string().datetime({ offset: true }).nullable().optional(),
+  endsAtISO: z.string().datetime({ offset: true }).nullable().optional(),
+  attendees: z.number().int().min(1).optional(),
+  budget: z.union([z.string(), z.number()]).nullable().optional(),
+  // No `currency` — editing it after a split exists would desync split rows (v1 keeps it fixed).
 });
 
 export const eventIdParam = z.object({ id: z.string().min(1) });

@@ -17,6 +17,6 @@
       "backgroundColor": "#f8f6f1",
       "resizeMode": "contain"
     },
-    "plugins": []
+    "plugins": ["@react-native-community/datetimepicker"]
   }
 }

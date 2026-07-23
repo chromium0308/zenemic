@@ -99,6 +99,7 @@ export function serializeSplit(
     shares: split.shares.map((s) => ({
       id: s.id,
       name: s.attendee?.name ?? 'Guest',
+      isHost: s.attendee?.isHost ?? false,
       amount: formatMoney(s.amountMinor, split.currency),
       amountMinor: s.amountMinor,
       status: s.status,

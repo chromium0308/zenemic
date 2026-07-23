@@ -98,7 +98,17 @@ export const api = {
     request<{ event: ApiEvent; resources: Record<string, boolean> }>('/events', { method: 'POST', body: input }),
   updateEvent: (
     id: string,
-    patch: { title?: string; dateLabel?: string; timeLabel?: string; location?: string; splitMode?: SplitMode },
+    patch: {
+      title?: string;
+      dateLabel?: string;
+      timeLabel?: string;
+      location?: string;
+      splitMode?: SplitMode;
+      startsAtISO?: string | null;
+      endsAtISO?: string | null;
+      attendees?: number;
+      budget?: string | number | null;
+    },
   ) => request<ApiEvent>(`/events/${id}`, { method: 'PATCH', body: patch }),
   deleteEvent: (id: string) => request<void>(`/events/${id}`, { method: 'DELETE' }),
 

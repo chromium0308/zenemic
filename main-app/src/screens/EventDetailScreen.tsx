@@ -82,7 +82,11 @@ export function EventDetailScreen({ navigation, route }: ScreenProps<'EventDetai
 
   return (
     <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
-      <ZenChrome label="EVENT DETAIL" onBack={() => navigation.goBack()} />
+      <ZenChrome
+        label="EVENT DETAIL"
+        onBack={() => navigation.goBack()}
+        onMenu={() => navigation.navigate('EditEvent', { event: base })}
+      />
       <ScrollView ref={scrollRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={24} gap={22}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>

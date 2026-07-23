@@ -11,12 +11,14 @@ import { Spinner } from '../components/Spinner';
 import { useAuth } from '../lib/auth';
 import { api, ApiError } from '../lib/api';
 import { registerForPushNotificationsAsync } from '../lib/push';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import type { Profile } from '../types/api';
 import { ScreenProps } from '../navigation/types';
 
 export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
   const t = useTheme();
   const { signOut } = useAuth();
+  const keyboardInset = useKeyboardInset();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [editingName, setEditingName] = useState(false);
@@ -116,14 +118,14 @@ export function SettingsScreen({ navigation }: ScreenProps<'Settings'>) {
   const since = profile ? new Date(profile.createdAt).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' }).toUpperCase() : '';
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome label="SETTINGS" onBack={() => navigation.goBack()} showMenu={false} />
       {loading && !profile ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Spinner size={22} borderWidth={2} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
           <Section paddingTop={28} gap={28}>
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
               <View style={{ width: 64, height: 64, borderRadius: RADIUS.lg, backgroundColor: t.surface2, borderWidth: 0.5, borderColor: t.hairline, alignItems: 'center', justifyContent: 'center' }}>

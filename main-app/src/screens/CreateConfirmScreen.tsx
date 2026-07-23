@@ -8,6 +8,7 @@ import { ZenButton } from '../components/ZenButton';
 import { Spinner } from '../components/Spinner';
 import { api, ApiError } from '../lib/api';
 import { formatBudget, splitModeLabel } from '../lib/format';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { useDraft } from '../navigation/DraftContext';
 import { ScreenProps } from '../navigation/types';
 
@@ -26,6 +27,7 @@ const EMPTY: Fields = { title: '', date: '', time: '', location: '', attendees: 
 export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>) {
   const t = useTheme();
   const { draft, setDraft } = useDraft();
+  const keyboardInset = useKeyboardInset();
   const [fields, setFields] = useState<Fields>(draft.fields ?? EMPTY);
   const [extracting, setExtracting] = useState(!draft.fields);
   const [error, setError] = useState<string | null>(null);
@@ -104,9 +106,9 @@ export function CreateConfirmScreen({ navigation }: ScreenProps<'CreateConfirm'>
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome label="EVENT.CREATE" onBack={() => navigation.goBack()} progress={2} total={4} showMenu={false} />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={28} gap={22}>
           <View>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>CONFIRM · 02 / 04</ZenText>

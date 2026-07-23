@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import { Linking, Pressable, ScrollView, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { FONTS, RADIUS, useTheme } from '../theme';
@@ -20,6 +20,7 @@ import {
   IconSpark,
 } from '../icons';
 import { api, ApiError } from '../lib/api';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import type { EventDetail } from '../types/api';
 import { ScreenProps } from '../navigation/types';
 
@@ -28,6 +29,8 @@ type ResourceId = 'chart' | 'cal' | 'split' | 'loc' | 'pix';
 export function EventDetailScreen({ navigation, route }: ScreenProps<'EventDetail'>) {
   const t = useTheme();
   const base = route.params.event;
+  const scrollRef = useRef<ScrollView>(null);
+  const keyboardInset = useKeyboardInset();
   const [detail, setDetail] = useState<EventDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
@@ -78,9 +81,9 @@ export function EventDetailScreen({ navigation, route }: ScreenProps<'EventDetai
   ];
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome label="EVENT DETAIL" onBack={() => navigation.goBack()} />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView ref={scrollRef} contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={24} gap={22}>
           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
             <ZenStatusBadge kind={ev.kind} />
@@ -159,7 +162,7 @@ export function EventDetailScreen({ navigation, route }: ScreenProps<'EventDetai
                 {notice ? <ZenText variant="body" tone="fg2" style={{ marginTop: 10 }}>{notice}</ZenText> : null}
               </View>
 
-              <EventChatPanel event={base} />
+              <EventChatPanel event={base} onGrow={() => scrollRef.current?.scrollToEnd({ animated: true })} />
             </>
           )}
         </Section>

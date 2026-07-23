@@ -7,6 +7,7 @@ import { ZenText } from '../components/ZenText';
 import { ZenInput } from '../components/ZenInput';
 import { ZenButton } from '../components/ZenButton';
 import { useAuth } from '../lib/auth';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { ScreenProps } from '../navigation/types';
 
 function friendly(message: string): string {
@@ -18,6 +19,7 @@ function friendly(message: string): string {
 export function LoginScreen({ navigation }: ScreenProps<'Login'>) {
   const t = useTheme();
   const { signIn } = useAuth();
+  const keyboardInset = useKeyboardInset();
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
   const [loading, setLoading] = useState(false);
@@ -39,9 +41,9 @@ export function LoginScreen({ navigation }: ScreenProps<'Login'>) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome label="BACK TO SIGN UP" onBack={() => navigation.replace('SignUp')} showMenu={false} />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={40} gap={28}>
           <View>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>WELCOME BACK</ZenText>

@@ -8,11 +8,13 @@ import { ZenInput } from '../components/ZenInput';
 import { ZenButton } from '../components/ZenButton';
 import { IconMail } from '../icons';
 import { useAuth } from '../lib/auth';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { ScreenProps } from '../navigation/types';
 
 export function SignUpScreen({ navigation }: ScreenProps<'SignUp'>) {
   const t = useTheme();
   const { signUp } = useAuth();
+  const keyboardInset = useKeyboardInset();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [pw, setPw] = useState('');
@@ -64,9 +66,9 @@ export function SignUpScreen({ navigation }: ScreenProps<'SignUp'>) {
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenBrandBar />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={40} gap={28}>
           <View>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>ACCOUNT</ZenText>

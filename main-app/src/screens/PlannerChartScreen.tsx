@@ -11,12 +11,14 @@ import { ChartTimeline } from '../components/ChartTimeline';
 import { Spinner } from '../components/Spinner';
 import { IconEdit } from '../icons';
 import { api, ApiError } from '../lib/api';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import type { ApiChart, ApiStage } from '../types/api';
 import { ScreenProps } from '../navigation/types';
 
 export function PlannerChartScreen({ navigation, route }: ScreenProps<'PlannerChart'>) {
   const t = useTheme();
   const ev = route.params.event;
+  const keyboardInset = useKeyboardInset();
   const [chart, setChart] = useState<ApiChart | null>(null);
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -85,14 +87,14 @@ export function PlannerChartScreen({ navigation, route }: ScreenProps<'PlannerCh
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome label="EVENT PLANNER CHART" onBack={() => navigation.goBack()} showMenu={false} />
       {loading && !chart ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
           <Spinner size={22} borderWidth={2} />
         </View>
       ) : (
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
           <Section paddingTop={22} gap={20}>
             <View>
               <ZenText variant="eyebrow" tone="fg3">{chart?.sub ?? ''}</ZenText>

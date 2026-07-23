@@ -20,7 +20,7 @@ function friendlyError(e: unknown): string {
   return err?.message ?? 'Something went wrong. Try again.';
 }
 
-export function EventChatPanel({ event }: { event: ZenEvent }) {
+export function EventChatPanel({ event, onGrow }: { event: ZenEvent; onGrow?: () => void }) {
   const t = useTheme();
   const greeting = `Hi. I've got the full picture on ${event.title}. Ask me to update the splitter, the planner chart, the calendar, or just to draft a message. You can attach a receipt photo and I'll itemise + split it.`;
   const [messages, setMessages] = useState<Msg[]>([{ role: 'assistant', content: greeting }]);
@@ -29,6 +29,7 @@ export function EventChatPanel({ event }: { event: ZenEvent }) {
   const [loading, setLoading] = useState(false);
   const [attachment, setAttachment] = useState<Attachment | null>(null);
   const scrollRef = useRef<ScrollView>(null);
+  const composerFocused = useRef(false);
 
   useEffect(() => {
     let alive = true;
@@ -49,6 +50,9 @@ export function EventChatPanel({ event }: { event: ZenEvent }) {
 
   useEffect(() => {
     scrollRef.current?.scrollToEnd({ animated: true });
+    // Keep the composer visible above the keyboard when replies grow the card.
+    if (composerFocused.current) onGrow?.();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, loading]);
 
   const pickReceipt = async () => {
@@ -141,6 +145,17 @@ export function EventChatPanel({ event }: { event: ZenEvent }) {
             placeholder={attachment ? 'Add a note (optional)…' : 'Ask Zenemic anything…'}
             placeholderTextColor={t.fg3}
             multiline
+            onFocus={() => {
+              composerFocused.current = true;
+            }}
+            onBlur={() => {
+              composerFocused.current = false;
+            }}
+            // iOS doesn't re-run its keyboard reveal when a multiline input grows a line,
+            // so follow the composer ourselves while it's focused.
+            onContentSizeChange={() => {
+              if (composerFocused.current) onGrow?.();
+            }}
             style={{ flex: 1, fontFamily: FONTS.sans, fontSize: 14.5, color: t.fg, maxHeight: 110, paddingVertical: 6 }}
           />
 

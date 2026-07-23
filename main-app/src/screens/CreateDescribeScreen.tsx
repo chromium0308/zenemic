@@ -6,6 +6,7 @@ import { Section, Anchor } from '../components/Section';
 import { ZenText } from '../components/ZenText';
 import { ZenInput } from '../components/ZenInput';
 import { ZenButton } from '../components/ZenButton';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { useDraft } from '../navigation/DraftContext';
 import { ScreenProps } from '../navigation/types';
 
@@ -18,13 +19,14 @@ const EXAMPLES = [
 export function CreateDescribeScreen({ navigation }: ScreenProps<'CreateDescribe'>) {
   const t = useTheme();
   const { draft, setDraft } = useDraft();
+  const keyboardInset = useKeyboardInset();
   const [msg, setMsg] = useState(draft.message ?? '');
   const exi = 0;
 
   const valid = msg.trim().length > 8;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome
         label="EVENT.CREATE"
         onBack={() => navigation.goBack()}
@@ -32,7 +34,7 @@ export function CreateDescribeScreen({ navigation }: ScreenProps<'CreateDescribe
         total={4}
         showMenu={false}
       />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         <Section paddingTop={28} gap={24}>
           <View>
             <ZenText variant="eyebrow" tone="fg3" style={{ marginBottom: 12 }}>INPUT · 01 / 04</ZenText>

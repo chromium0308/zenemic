@@ -8,11 +8,13 @@ import { ZenInput } from '../components/ZenInput';
 import { ZenButton } from '../components/ZenButton';
 import { IconMail } from '../icons';
 import { useAuth } from '../lib/auth';
+import { useKeyboardInset } from '../lib/useKeyboardInset';
 import { ScreenProps } from '../navigation/types';
 
 export function ForgotPasswordScreen({ navigation }: ScreenProps<'Forgot'>) {
   const t = useTheme();
   const { resetPassword } = useAuth();
+  const keyboardInset = useKeyboardInset();
   const [email, setEmail] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,13 +36,13 @@ export function ForgotPasswordScreen({ navigation }: ScreenProps<'Forgot'>) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: t.bg, paddingBottom: keyboardInset }}>
       <ZenChrome
         label={sent ? 'CHECK YOUR INBOX' : 'BACK TO LOGIN'}
         onBack={() => navigation.goBack()}
         showMenu={false}
       />
-      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} keyboardShouldPersistTaps="handled" automaticallyAdjustKeyboardInsets>
         {!sent ? (
           <Section paddingTop={40} gap={28}>
             <View>
